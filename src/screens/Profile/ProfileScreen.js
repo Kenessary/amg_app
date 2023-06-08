@@ -139,6 +139,34 @@ const getSot = () => {
   }
 }
 
+const deleteUserToken = () => { 
+  setIsLoading(true)
+  const data = qs.stringify({
+    'deletetokenfromtableiin': iin 
+  });
+  const config = {
+    method: 'post',
+    url: 'http://95.57.218.120/?index',
+    headers: { 
+      'Authorization': 'Basic OTgwNjI0MzUxNDc2OjIyMjI=', 
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data : data
+  };
+  axios(config)
+  .then(async function(response){
+      let user = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
+      let parsed = JSON.parse(user)
+      console.log(parsed)
+      setIsLoading(false)
+  })
+  .catch(function(error){
+      console.log(error)
+      setIsLoading(false)
+  }) 
+}
+
+
 // console.log(iin)
 
 const deleteAccount = () =>{
@@ -234,7 +262,7 @@ if(isLoading) {
                         <View style={{flexDirection:'row'}}>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
-                            onPress = {()=> logout()}
+                            onPress = {()=> {logout(); deleteUserToken()}}
                         >
                             <Text style={styles.textStyle}>{i18n.t('daYes')}</Text>
                         </Pressable>

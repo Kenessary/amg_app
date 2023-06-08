@@ -5,7 +5,7 @@
       "icon": "./assets/push_icon.png"
     },
     "slug": "amg_life",
-    "version": "1.2.4",
+    "version": "1.2.7",
     "orientation": "portrait",
     "icon": "./assets/cnpc_app_logo.png",
     "userInterfaceStyle": "automatic",
@@ -37,13 +37,14 @@
       }
     },
     "android": {
-      "versionCode": 16 ,
+      "versionCode": 19,
       "adaptiveIcon": {
         "foregroundImage": "./assets/cnpc_app_logo.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "kz.portmasterplus.cnpcamglife",
-      "googleServicesFile": "./android/app/google-services.json"
+      "googleServicesFile": "./android/app/google-services.json",
+      "runtimeVersion": "sdkVersion"
     },
     "web": {
       "favicon": "./assets/favicon.png"

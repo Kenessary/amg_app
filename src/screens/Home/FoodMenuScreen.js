@@ -156,15 +156,16 @@ function FoodMenuScreen({navigation, goBack}) {
 
     const foods = []
     // const date = new Date().toDateString()
+    
 
     if (menu.length !== 1) {
-        for(let i = 0; i< menu.length-1; i++){
+        for(let i = 0; i< menu.length-2; i++){
             const eat = (menu[i]).replace('"', '').replace(' ', '')
     
             foods.push(
-                <View style={{ height: 40, flexDirection:'row', marginBottom: 20,}} key={Math.random()}>
+                <View style={{ flexDirection:'row', marginBottom: 20,}} key={Math.random()}>
                     <FontAwesome name="circle" size={15} color="#D64D43" style={{marginTop:3}}/>
-                    <View style={{marginLeft: 5, width: windowWidth/1.3}}>
+                    <View style={{marginLeft: 5 }}>
                         <Text style={{color:'black', fontSize: 16}} key={Math.random()}>{eat}</Text>
                     </View>
                 </View> 
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
     foods: {
         width: windowWidth - 60,
         position: 'absolute', 
-        top: 70
+        top: 60
     }
 })
 

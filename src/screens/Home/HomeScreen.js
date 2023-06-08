@@ -140,7 +140,7 @@ useEffect(()=>{
   setIsLoading(true)
   const config = {
     method:'get',
-    url: `http://95.57.218.120/?apitest.helloAPIObnova={"ver":"1.2.4"}`,
+    url: `http://95.57.218.120/?apitest.helloAPIObnova={"ver":"1.2.7"}`,
     headers: {  }
   }
   axios(config)
@@ -342,7 +342,7 @@ useEffect(()=>{
                         style={{flexDirection:'row', alignItems:'center', marginBottom:10, marginTop:10}}
                         onPress={()=>Linking.openURL('vnd.youtube://@cnpc-amg7239/CNPC-AMG/')}>
                           <Entypo name="youtube" size={30} color="#FF0000" />
-                          <Text style={{marginLeft:20, fontSize:20, color:'#4d4d4d'}}>CNPC-AMG</Text>
+                          <Text style={{marginLeft:20, fontSize:20, color:'#4d4d4d'}}>CNPC-AMG Life</Text>
                       </TouchableOpacity>
 
                       <View style={{height:2, backgroundColor:'#CFCFCF'}}></View>
@@ -378,27 +378,15 @@ useEffect(()=>{
       <View style={{alignItems:'center'}}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{i18n.t('main')}</Text>
-          {/* <View style={styles.socialnet}>
-            <TouchableOpacity onPress={()=>Linking.openURL(`instagram://user?username=cnpc_kazakhstan`)}>
-              <Entypo name="instagram-with-circle" size={28} color="#D5463C" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={()=>Linking.openURL('vnd.youtube://@cnpc-amg7239/CNPC-AMG/')}>
-              <Entypo name="youtube-with-circle" size={28} color="#D5463C" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={()=>Linking.openURL('http://facebook.com/cnpc.kazakhstan')}>
-              <Entypo name="facebook-with-circle" size={28} color="#D5463C" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={()=>Linking.openURL('http://www.cnpc-amg.kz/')}>
-              <MaterialCommunityIcons name="web" size={29} color="#D5463C" />
-            </TouchableOpacity>
-          </View> */}
+          <View>
           <TouchableOpacity 
             style={{padding:5,paddingLeft:10, paddingRight:10, backgroundColor:'white', flexDirection:'row', alignItems:'center', borderRadius:15, borderWidth:0.3, borderColor:'#4d4d4d'}}
             onPress={() => setModalSocial(true)}
             >
-            <Image source={require('../../../assets/androidpush.png')} style={{width:22, height:22, marginRight:8}}/>
-            <Text style={{fontSize:17, fontWeight:'600', color:'#4d4d4d'}}>AMG-Life</Text>
+            <Image source={require('../../../assets/androidpush.png')} style={{width:20, height:20, marginRight:8}}/>
+            <Text style={{fontSize:15, fontWeight:'600', color:'#4d4d4d'}}>AMG-Life <Text style={{fontSize:13, fontWeight:'400', color:'#4d4d4d'}}> версия: 1.2.7</Text></Text>
           </TouchableOpacity>
+          </View>
         </View>
       </View>
 
