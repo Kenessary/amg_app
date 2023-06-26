@@ -20,6 +20,9 @@ const windowHeight = Dimensions.get('window').height;
 
 export default function HomeScreen({navigation}){
 
+  // change version before update
+  const version = "1.2.7"
+
   const {iin, historyOpened} = useContext(AuthContext)
   let [apparat, setApparat] = useState('');
   let [stol, setStol] = useState('');
@@ -113,6 +116,36 @@ export default function HomeScreen({navigation}){
     fetchDataEdo()
   },[])
 
+  //--------- ВЕРСИЯ ПРИЛОЖЕНИЯ --------- //
+  const fetchDataVersion = () => {
+    try {
+      const data = qs.stringify({
+      'addinfoversionontableiin': iin,
+      'addinfoversionontablever': version
+    });
+    const config = {
+      method: 'post',
+      url: 'http://95.57.218.120/?index',
+      headers: { 
+        'Authorization': 'Basic OTgwNjI0MzUxNDc2OjIyMjI=', 
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data : data
+    };
+    axios(config)
+    .then(async function(response){
+      let user = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
+      let parsed = JSON.parse(user)
+      console.log(parsed) 
+    })
+  } catch (error) {
+    console.error(error)}
+  }
+
+  useEffect(()=>{
+    fetchDataVersion()
+  },[])
+
 //--------- МЕНЮ ДЛЯ ОПРОСА --------- //
   useEffect(()=>{
     setIsLoading(true)
@@ -140,7 +173,7 @@ useEffect(()=>{
   setIsLoading(true)
   const config = {
     method:'get',
-    url: `http://95.57.218.120/?apitest.helloAPIObnova={"ver":"1.2.7"}`,
+    url: `http://95.57.218.120/?apitest.helloAPIObnova={"ver":"${version}"}`,
     headers: {  }
   }
   axios(config)
@@ -384,7 +417,7 @@ useEffect(()=>{
             onPress={() => setModalSocial(true)}
             >
             <Image source={require('../../../assets/androidpush.png')} style={{width:20, height:20, marginRight:8}}/>
-            <Text style={{fontSize:15, fontWeight:'600', color:'#4d4d4d'}}>AMG-Life <Text style={{fontSize:13, fontWeight:'400', color:'#4d4d4d'}}> версия: 1.2.7</Text></Text>
+            <Text style={{fontSize:15, fontWeight:'600', color:'#4d4d4d'}}>AMG-Life <Text style={{fontSize:13, fontWeight:'400', color:'#4d4d4d'}}> версия: {version}</Text></Text>
           </TouchableOpacity>
           </View>
         </View>
