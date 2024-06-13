@@ -16,6 +16,7 @@ import { AuthContext } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+import themeContext from '../../cores/themeContext';
 
 
 
@@ -24,6 +25,27 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function SpecformScreen ({navigation}) {
+
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  globalThis.dm = isDarkMode
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+  
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
  
   let [locale, setLocale] = useState('');
   let [lang, setLang] = useState('')
@@ -106,9 +128,9 @@ export default function SpecformScreen ({navigation}) {
 
     if(isLoading) {
         return(
-          <View style={styles.indicator}>
-            <WaveIndicator color="#D64D43"/>
-          </View>
+          <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+          <WaveIndicator color={theme.loading}/>
+        </View>
         )
       }
 
@@ -116,24 +138,24 @@ export default function SpecformScreen ({navigation}) {
     if (JSON.stringify(spec) !== ('[]')){
       for(let i = 0; i< spec.length; i++){
         specod.push(
-            <View key={i} style={styles.card}>
-            <View style={styles.cardHeader} >
+            <View key={i} style={{...styles.card, backgroundColor: isDarkMode ? '#1C3F5C' : '#F4F4F4' }}>
+            <View style={{...styles.cardHeader, backgroundColor: isDarkMode === true ? '#C0D5EE' : '#D64D43'}} >
               <View style={styles.cardHeaderInside}>
-                <Text style={styles.cardHeaderText}>
+                <Text style={{...styles.cardHeaderText, color: theme.background}}>
                     {spec[i].firm}
                 </Text>
               </View>
             </View>
             <View style={styles.cardBodyField}>
-              <View style={{width:'100%', height:100, alignItems:'center', justifyContent:'center', borderRadius:15, marginBottom:10, borderColor:'grey', borderWidth:1}}> 
-                <Text style={{fontSize: 16, width: '90%'}}>{spec[i].tovar}</Text>
+              <View style={{width:'100%', height:100, alignItems:'center', justifyContent:'center', borderRadius:15, marginBottom:10, borderColor:theme.color, borderWidth:1}}> 
+                <Text style={{fontSize: 16, width: '90%', color: theme.color}}>{spec[i].tovar}</Text>
               </View>  
               <View style={styles.cardBody20}>
                 <View style={styles.paragraphField}>
-                  <Text>{i18n.t('dataVydachi')}</Text>
+                  <Text style={{color: theme.color}}>{i18n.t('dataVydachi')}</Text>
                 </View>
                 <View style={styles.paragraphNachalo}>
-                  <Text style={styles.paragraphNachaloText}>
+                  <Text style={{...styles.paragraphNachaloText, color: theme.color}}>
                     {spec[i].dat_pri}
                   </Text>
                 </View>
@@ -141,10 +163,10 @@ export default function SpecformScreen ({navigation}) {
     
               <View style={styles.cardBody20}>
                 <View style={styles.paragraphField}>
-                  <Text>{i18n.t('dataSpisani')}</Text>
+                  <Text style={{color: theme.color}}>{i18n.t('dataSpisani')}</Text>
                 </View>
                 <View style={styles.paragraphKonec}>
-                  <Text style={styles.paragraphNachaloText}>
+                <Text style={{...styles.paragraphNachaloText, color: theme.color}}>
                     {spec[i].dat_spis}
                   </Text>
                 </View>
@@ -152,37 +174,37 @@ export default function SpecformScreen ({navigation}) {
     
               <View style={styles.cardBody20}>
                 <View style={styles.paragraphField}>
-                  <Text>{i18n.t('codeTovar')}</Text>
+                  <Text style={{color: theme.color}}>{i18n.t('codeTovar')}</Text>
                 </View>
                 <View style={styles.paragraphText}>
-                  <Text>{spec[i].kod_tov}</Text>
+                  <Text style={{color: theme.color}}>{spec[i].kod_tov}</Text>
                 </View>
               </View>
     
               <View style={styles.cardBody20}>
                 <View style={styles.paragraphField}>
-                  <Text>{i18n.t('kolichestvo')}</Text>
+                  <Text style={{color: theme.color}}>{i18n.t('kolichestvo')}</Text>
                 </View>
                 <View style={styles.paragraphText}>
-                  <Text>{spec[i].kol_ost}</Text>
+                  <Text style={{color: theme.color}}>{spec[i].kol_ost}</Text>
                 </View>
               </View>
     
               <View style={styles.cardBody20}>
                 <View style={styles.paragraphField}>
-                  <Text>{i18n.t('stoimost')}</Text>
+                  <Text style={{color: theme.color}}>{i18n.t('stoimost')}</Text>
                 </View>
                 <View style={styles.paragraphText}>
-                  <Text>{spec[i].st_ost}</Text>
+                  <Text style={{color: theme.color}}>{spec[i].st_ost}</Text>
                 </View>
               </View>
               
               <View style={styles.cardBody20}>
                 <View style={styles.paragraphField}>
-                  <Text>{i18n.t('normaDnei')}</Text>
+                  <Text style={{color: theme.color}}>{i18n.t('normaDnei')}</Text>
                 </View>
                 <View style={styles.paragraphText}>
-                  <Text>{spec[i].sr_isp}</Text>
+                  <Text style={{color: theme.color}}>{spec[i].sr_isp}</Text>
                 </View>
               </View>
     
@@ -203,7 +225,7 @@ export default function SpecformScreen ({navigation}) {
 
 
     return (
-        <View style={styles.container} >
+        <View style={{...styles.container, backgroundColor: theme.background}} >
 
 
 

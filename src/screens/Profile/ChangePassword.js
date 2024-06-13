@@ -1,5 +1,5 @@
-import { Modal, ScrollView, Text, View,Keyboard, TouchableOpacity, TextInput, Dimensions, StyleSheet,Pressable,Linking, Alert } from 'react-native'
-import React, { Component, useContext, useEffect, useState } from 'react'
+import { Modal, ScrollView, Text, View,Keyboard, TouchableOpacity, Dimensions, StyleSheet,Pressable,Linking, Alert, Platform } from 'react-native'
+import React, { Component, useContext, useEffect, useState, useRef } from 'react'
 import { AuthContext } from '../../context/AuthContext'
 import Input from '../../components/Input'
 import Buttons from '../../components/Buttons'
@@ -11,15 +11,47 @@ import { WaveIndicator } from 'react-native-indicators'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+import themeContext from '../../cores/themeContext'
+import { BottomSheet } from 'react-native-btr'
+// import PhoneInput from '../../components/PhoneInput'
+import PhoneInputComponent from '../../components/PhoneInput'
+import { TextInput} from 'react-native-paper';
+import OTPScreen from '../../components/OTPScreen'
+
 
 
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-export default function ChangePassword (){
+
+
+export default function ChangePassword ({navigation}){
     let [locale, setLocale] = useState('');
     let [lang, setLang] = useState('')
+
+
+
+    const theme = useContext(themeContext)
+const [isDarkMode, setIsDarkMode] = useState(false);
+globalThis.dm = isDarkMode
+
+useEffect(() => {
+  // Load the user's preference from AsyncStorage
+  loadDarkModePreference();
+}, []);
+
+const loadDarkModePreference = async () => {
+  try {
+    const preference = await AsyncStorage.getItem('darkMode');
+    if (preference !== null) {
+      setIsDarkMode(JSON.parse(preference));
+    }
+  } catch (error) {
+    console.log('Error loading dark mode preference:', error);
+  }
+};
+
 
     i18n.fallbacks = true
     i18n.translations = { kz, ru, ch };
@@ -64,8 +96,26 @@ export default function ChangePassword (){
     const [isLoading, setIsLoading] = useState(false)
     const [isActive, setActive] = useState(false);
     const [errorsRenew, setErrorsRenew] = useState({})
+    const [errorsCode, setErrorsCode] = useState({})
     const [isCode, setIsCode] = useState('')
     const [codeField, setCodeField] = useState('')
+    const [phoneNumber, setPhoneNumber] = useState('');
+  
+
+    const [code, setCode] = useState('');
+
+    const [visible, setVisible] = useState(false);
+    const [visible1, setVisible1] = useState(false);
+    const [visible2, setVisible2] = useState(false);
+    const [isWhatsNumber, setIsWhatsNumber] = useState(true);
+
+    const handlePhoneChange = (value) => {
+        setPhoneNumber(value); // Update the local state with the unformatted phone number
+      };
+
+      useEffect(()=>{
+        setVisible2(true)
+      },[])
 
     // console.log(iin)
     const back = () => {
@@ -76,6 +126,11 @@ export default function ChangePassword (){
         setModalVisible4(false)
         setModalVisible5(false)
     }
+
+    const toggleBottomNavigationView = () => {
+        //Toggling the visibility state of the bottom sheet
+        setVisible(!visible);
+      };
 
     const validateRenew = () => {
         Keyboard.dismiss()
@@ -116,38 +171,60 @@ export default function ChangePassword (){
         setErrorsRenew(prevState=>({...prevState, [input]: errorMessage}))
     }
 
-    
-    const sendCode = () => {
-        const val = Math.floor(1000 + Math.random() * 9000);
-        // console.log(val)
-        setRandomNumber(val)
+    const getNumbers = ()=> {
         setIsLoading(true)
-        const data = qs.stringify({
-            'whatsnum': respass,
-            'whatstxt': val
-        })
         const config = {
-            method: 'post',
-            url: `http://95.57.218.120/?index`,
-            headers: { 
-                'Authorization': 'Basic OTgwNjI0MzUxNDc2OjIyMjI=', 
-                'Content-Type': 'application/x-www-form-urlencoded'
-              },
-            data : data  
+          method:'get',
+          url: `http://95.57.218.120/?apitest.helloAPI515={}`,
+          headers: {  }
         }
         axios(config)
         .then(function(response){
-            let idMess = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
-            setIsCode(idMess)
-            setModalVisible3(true)
-            setIsLoading(false)
+          let info = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
+          let parse_first = JSON.parse(info)
+          let parse_second = parse_first.response
+          let recCode = JSON.parse(parse_second).status
+          setCode(recCode)
+
+          const telphone = respass.slice(1)
+          const slicedPhone = phoneNumber1.slice(2)
+  
+    
+  
+          
+          let data = `{\r\n    "chatId":"${isWhatsNumber === true ? '7'+telphone : '7'+slicedPhone}@c.us",\r\n    "message":"Код подтверждения: ${recCode}"\r\n}`;
+  
+          let config = {
+              method: 'post',
+              maxBodyLength: Infinity,
+              url: 'https://api.green-api.com/waInstance7103843536/sendMessage/9b4b62a22d4f46eaa6598d12b8a1a69a1293ab4375eb47fbbc',
+              headers: { 
+                  'Content-Type': 'text/plain'
+              },
+              data : data
+          };
+          axios(config)
+          .then(function(response){
+              let idMess = response.data
+              console.log(idMess.idMessage)
+              setIsSendMessage(idMess)
+              setIsLoading(false)
+          })
+          .catch(function(error){
+              console.log(error)
+              // setModalVisible2(false)
+              setIsLoading(false)
+          }) 
+        //   setIsLoading(false)
         })
-        .catch(function(error){
-            console.log(error)
-            // setModalVisible2(false)
-            setIsLoading(false)
-        })  
+          .catch(function (error) {
+          console.log(error);
+          setIsLoading(false)
+        })
     }
+
+   
+
 
     const restorePass = () => {
         setIsLoading(true)
@@ -190,6 +267,10 @@ export default function ChangePassword (){
         restorePass()
     },[])
 
+    const handlePhoneNumberChange = (phoneNumber) => {
+        setPhoneNumber1(phoneNumber)
+      };
+
     const verification = () => {
         if( randomNumber != '' && inputs4.code != '' && randomNumber == inputs4.code){
             setModalVisible4(true)
@@ -203,307 +284,84 @@ export default function ChangePassword (){
         }
         
     }
+ 
 
     if(isLoading) {
         return(
-            <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor:'white', height:'100%'}}>
-                <WaveIndicator color="#D64D43"/>
-            </View>
+            <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+            <WaveIndicator color={theme.loading}/>
+          </View>
         )
     }
 
     return (
-      <View style={{backgroundColor:'white', height:'100%'}}>
-           {/* <View style={{flex: 1, alignItems:'center', justifyContent:'center'}}>
-                <ScrollView 
-                    scrollEnabled={false}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{
-                        paddingTop: 5,
-                        paddingHorizontal: 20
-                    }}
-                >
-                    <Text style={{fontWeight:'bold', color:COLORS.black, fontSize: 18, marginTop: 10}}>
-                        {iin}
-                    </Text>
-                    <View>
-                        <View style={{backgroundColor:'#BAE6FD', flexDirection:'row', borderRadius: 15, marginTop: 20}}>
-                            <View style={{width: '20%', height:'100%', padding: 18, paddingTop:25}}>
-                                <AntDesign name="exclamationcircle" size={30} color="#007FDB" />
-                            </View>
-                            <View style={{width: '80%',padding: 18, paddingLeft: 0, paddingTop: 25}}>
-                                <Text style={{textAlign:'left', color: COLORS.black}}>
-                                {i18n.t('sendCodeTextWarning')}
-                                </Text>
-                            </View>
-                        </View>
-                        <Buttons title={i18n.t('call')} onPress={()=> Linking.openURL(`tel:${87132766272}`)}/>
-                    </View>
-                </ScrollView>
-            </View> */}
-
-<View style={{alignItems:'center', justifyContent:'center', paddingTop: 0, opacity: modalVisible5 ? 0.3 : 1}}>
-
-{/* 
-<Text style={{color: COLORS.black, fontSize: 20, fontWeight: 'bold'}}>
-            {i18n.t('renewParol')}
-            </Text> */}
-</View>
-
-                <View style={{opacity: modalVisible5 ? 0.3 : 1}}>
-                <View style={{marginVertical: 15, width: windowWidth-60, marginLeft:30}}>
-                <Input 
-                    iconName='lock-outline' 
-                    label={i18n.t('password')}
-                    error={errorsRenew.parol}
-                    onFocus={()=>{
-                        handleErrorRenew(null, 'parol')
-                    }}
-                    placeholder = {i18n.t('passwordLabel')}
-                    password
-                    onChangeText={(text)=>handleOnChangeRenew(text, 'parol')}
-                />
-                <View style={{marginTop:-15,}}>
-
-                <Input 
-                    iconName='lock-outline' 
-                    label={i18n.t('passwordRep')}
-                    error={errorsRenew.parol2}
-                    onFocus={()=>{
-                        handleErrorRenew(null, 'parol2')
-                    }}
-                    placeholder = {i18n.t('passwordLabel')}
-                    password
-                    onChangeText={(text)=>handleOnChangeRenew(text, 'parol2')}
-                />
-                </View>
-
-                <View style={{marginTop:-15}}>
-                    <Buttons title={i18n.t('renewParolChange')} onPress={validateRenew}/>
-                </View>
-
-                {/* <TouchableOpacity activeOpacity={0.7} onPress={()=>setModalVisible5(true)} style={{ height: 45, width: "100%", backgroundColor: '#F5DBDA', justifyContent:'center', alignItems:'center', borderRadius: 10,}}>
-                    <Text style={{color: '#D64D43', fontWeight: 'bold', fontSize: 18}}>{i18n.t('renewParolCancel')}</Text>
-                </TouchableOpacity> */}
+      <View style={{backgroundColor: theme.background, height:'100%'}}>
+      <TouchableOpacity activeOpacity={0.7} onPress={()=>(navigation.navigate('ProfileScreen'))} style={{marginLeft: 30, marginTop:30, display: visible1 === false ? 'flex' : 'none'}}>
+            <AntDesign name="leftsquare" size={24} color={theme.color} style={{opacity: 0.5}} />            
+          </TouchableOpacity>
 
 
-
-
-                <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={modalVisible5}
-                >
-                    <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalText}>{i18n.t('renewParolCancelModal')}</Text>
-                        <View style={{flexDirection:'row'}}>
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress = {back}
-                        >
-                            <Text style={styles.textStyle}>{i18n.t('daYes')}</Text>
-                        </Pressable>
-
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible5(!modalVisible5)}
-                        >
-                            <Text style={styles.textStyle}>{i18n.t('netNo')}</Text>
-                        </Pressable>
-
-                        </View>
-                    </View>
-                    </View>
-                </Modal>
+        <View style={{opacity: modalVisible5 ? 0.3 : 1}}>
+          <View style={{marginVertical: 15, width: windowWidth-60, marginLeft:30}}>
+            <Input 
+              iconName='lock-outline' 
+              label={i18n.t('password')}
+              error={errorsRenew.parol}
+              onFocus={()=>{
+                handleErrorRenew(null, 'parol')
+              }}
+              placeholder = {i18n.t('passwordLabel')}
+              password
+              onChangeText={(text)=>handleOnChangeRenew(text, 'parol')}
+            />
+            <View style={{marginTop:-15,}}>
+              <Input 
+                iconName='lock-outline' 
+                label={i18n.t('passwordRep')}
+                error={errorsRenew.parol2}
+                onFocus={()=>{
+                  handleErrorRenew(null, 'parol2')
+                }}
+                placeholder = {i18n.t('passwordLabel')}
+                password
+                onChangeText={(text)=>handleOnChangeRenew(text, 'parol2')}
+              />
             </View>
-                </View>
-
-
-
-        {/* <Modal 
-            animationType="none"
-            transparent={false}
-            visible={modalVisible3}
-        >
-              <TouchableOpacity activeOpacity={0.7} onPress={()=>setModalVisible3(false)} style={{marginLeft: 30, marginTop:30}}>
-            <AntDesign name="closesquare" size={24} color={COLORS.black} style={{opacity: 0.5}} />            
-            </TouchableOpacity>
-            
-                   <View style={{flex: 1, alignItems:'center', justifyContent:'center'}}>
-            
-            <ScrollView 
-        scrollEnabled={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-            paddingTop: 5,
-            paddingHorizontal: 20
-        }}>
-
-
-<View style={{alignItems:'center', justifyContent:'center'}}>
-
-
-<Text style={{color: COLORS.black, fontSize: 20, fontWeight: 'bold'}}>
-{i18n.t('codeVerificationTitle')}
-            </Text>
-</View>
-
-    
-            <Text style={{color: COLORS.black, fontSize: 16, marginTop: 20}}>
-            {i18n.t('codeVerificationText')}
-            </Text>
-
-<View style={{alignItems:'center'}}>
-
-
-
-<View style={{alignItems:'center', justifyContent:'center'}}>
-                    <Input
-                        keyboardType="numeric"  
-                        error={errorsCode.iinCode}
-                        onFocus={()=>{
-                            handleErrorCode(null, 'iinCode')
-                        }}
-                        placeholder = "Введите ИИН"
-                        onChangeText={(text)=>handleOnChangeCode(text, 'iinCode')}
-                        maxLength={4}
-                    
-                    />
-
-                    <TextInput
-                        style={{height:50, width:160, borderColor: isActive ? '#D64D43' : '#787878', borderWidth:3, marginTop:15, marginBottom:15, fontSize:30, letterSpacing:3, borderRadius:15, fontWeight:'600', color:'#787878'}}
-                        maxLength={4}
-                        keyboardType='numeric'
-                        keyboardAppearance='light'
-                        textAlign={'center'}
-                        onFocus={() => setActive(true)} 
-                        onBlur={() => setActive(false)}
-                        onChangeText={(text)=>handleOnChange4(text, 'code')}
-                    />
-
-        
-
-
-                </View>
-
-</View>
-
-<View style={{flexDirection: 'row'}}>
-    <Text style={{fontSize:15, opacity:0.7}}>{i18n.t('codeGetText')}</Text>
-    <TouchableOpacity style={{marginLeft: 5}} onPress={sendCode} ><Text style={{textDecorationLine:'underline', fontSize:15, color:'#D64D43', fontWeight:'bold', opacity:0.90}}>{i18n.t('codeResend')}</Text></TouchableOpacity>
-</View>
-
-<TouchableOpacity activeOpacity={0.7} onPress={()=> Linking.openURL('whatsapp://app')} style={{ height: 45, width: "100%", backgroundColor: '#24BE41',alignItems:'center', justifyContent:'center', borderRadius: 10,marginTop:15}}>
-                    <Text style={{color: 'white', fontSize: 16, fontWeight:'bold'}}> <FontAwesome name="whatsapp" size={20} color="white" /> {i18n.t('openApp')}</Text>
-            </TouchableOpacity>
-
-<Buttons title={i18n.t('verification')}  onPress={verification}/>
-          
-  
-
-            <View>
-
-
-</View>
-    
-  
-        </ScrollView>
-
+            <View style={{marginTop:-15}}>
+              <Buttons title={i18n.t('renewParolChange')} onPress={validateRenew}/>
+            </View>
+            <View style={{marginTop:-15}}>
+              {/* <Buttons title='send' onPress={sendToWhatsApp}/> */}
             </View>
 
-            <Modal 
-            animationType="none"
-            transparent={false}
-            visible={modalVisible4}
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible5}
             >
-                <View style={{alignItems:'center', justifyContent:'center', paddingTop: 40, opacity: modalVisible5 ? 0.3 : 1}}>
-
-
-<Text style={{color: COLORS.black, fontSize: 20, fontWeight: 'bold'}}>
-            {i18n.t('renewParol')}
-            </Text>
-</View>
-
-                <View style={{opacity: modalVisible5 ? 0.3 : 1}}>
-                <View style={{marginVertical: 15, width: windowWidth-60, marginLeft:30}}>
-                <Input 
-                    iconName='lock-outline' 
-                    label={i18n.t('password')}
-                    error={errorsRenew.parol}
-                    onFocus={()=>{
-                        handleErrorRenew(null, 'parol')
-                    }}
-                    placeholder = {i18n.t('passwordLabel')}
-                    password
-                    onChangeText={(text)=>handleOnChangeRenew(text, 'parol')}
-                />
-                <View style={{marginTop:-15,}}>
-
-                <Input 
-                    iconName='lock-outline' 
-                    label={i18n.t('passwordRep')}
-                    error={errorsRenew.parol2}
-                    onFocus={()=>{
-                        handleErrorRenew(null, 'parol2')
-                    }}
-                    placeholder = {i18n.t('passwordLabel')}
-                    password
-                    onChangeText={(text)=>handleOnChangeRenew(text, 'parol2')}
-                />
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Text style={styles.modalText}>{i18n.t('renewParolCancelModal')}</Text>
+                  <View style={{flexDirection:'row'}}>
+                    <Pressable
+                      style={[styles.button, styles.buttonClose]}
+                      onPress = {back}
+                    >
+                      <Text style={styles.textStyle}>{i18n.t('daYes')}</Text>
+                    </Pressable>
+                    <Pressable
+                      style={[styles.button, styles.buttonClose]}
+                      onPress={() => setModalVisible5(!modalVisible5)}
+                    >
+                      <Text style={styles.textStyle}>{i18n.t('netNo')}</Text>
+                    </Pressable>
+                  </View>
                 </View>
+              </View>
+            </Modal>
+          </View>
+        </View>
 
-                <View style={{marginTop:-15}}>
-                    <Buttons title={i18n.t('renewParolChange')} onPress={validateRenew}/>
-                </View>
-
-                <TouchableOpacity activeOpacity={0.7} onPress={()=>setModalVisible5(true)} style={{ height: 45, width: "100%", backgroundColor: '#F5DBDA', justifyContent:'center', alignItems:'center', borderRadius: 10,}}>
-                    <Text style={{color: '#D64D43', fontWeight: 'bold', fontSize: 18}}>{i18n.t('renewParolCancel')}</Text>
-                </TouchableOpacity>
-
-
-
-
-                <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={modalVisible5}
-                >
-                    <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalText}>{i18n.t('renewParolCancelModal')}</Text>
-                        <View style={{flexDirection:'row'}}>
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress = {back}
-                        >
-                            <Text style={styles.textStyle}>{i18n.t('daYes')}</Text>
-                        </Pressable>
-
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible5(!modalVisible5)}
-                        >
-                            <Text style={styles.textStyle}>{i18n.t('netNo')}</Text>
-                        </Pressable>
-
-                        </View>
-                    </View>
-                    </View>
-                </Modal>
-            </View>
-                </View>
-
-
-
-
-
-
-
-            </Modal> 
-
-        </Modal>
-             */}
       </View>
     )
 }
@@ -522,6 +380,14 @@ const styles = StyleSheet.create({
         paddingLeft:10,
         paddingRight:10,
         marginLeft:5
+      },
+      bottomNavigationView: {
+        width: '100%',
+        height: 400,
+        padding:20,
+        borderTopLeftRadius:25,
+        borderTopRightRadius:25, 
+        backgroundColor:'white'
       },
       buttonSelectedContainer: {
           marginTop: 10, 

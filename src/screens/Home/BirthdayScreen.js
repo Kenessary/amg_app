@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { View, Text, Dimensions, ScrollView, StyleSheet, Button, TouchableOpacity} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'
 import axios from 'axios';
 import moment from 'moment';
 import { WaveIndicator } from 'react-native-indicators';
+import LottieView from "lottie-react-native"
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -12,8 +13,29 @@ const windowHeight = Dimensions.get('window').height;
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+import themeContext from '../../cores/themeContext';
 
 function BirthdayScreen({navigation}) {
+  const theme = useContext(themeContext)
+
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+
   const [ birthday, setBirthday ] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [ texmonth, setTextMonth ] = useState([])
@@ -71,8 +93,11 @@ function BirthdayScreen({navigation}) {
         }
   }
 
+  // console.log(birthday[0])
 //--------- ДАТА СЕГОДНЯ --------- //
   const date = moment().format(`DD ${texmonth} YYYY`)
+  const day = moment().format(`DD`)
+  const mm = moment().format(`MM`)
 
 //--------- ЗАПРОС ДНИ РОЖДЕНИЯ --------- //
   const btd = () => {
@@ -89,6 +114,10 @@ function BirthdayScreen({navigation}) {
       let parse_second = JSON.parse(parse_first.response)
       let parse_third = parse_second.status
       setBirthday((JSON.stringify(parse_third)).split(';'))
+      let arr = (JSON.stringify(parse_third)).split(';')
+      let norm = arr.map((list)=>list.replace('"', '').replace(' ', ''))
+      norm.pop()
+      norm.push('Зәкір Кенесары Тәжібайұлы')
       const month = moment().format('MM')
 
       if (month === '01'){setTextMonth(i18n.t('january'))}
@@ -104,6 +133,7 @@ function BirthdayScreen({navigation}) {
       if (month === '11'){setTextMonth(i18n.t('november'))}
       if (month === '12'){setTextMonth(i18n.t('december'))}
       setIsLoading(false)
+      // console.log(norm)
     })
      .catch(function (error) {
       console.log(error);
@@ -121,11 +151,11 @@ function BirthdayScreen({navigation}) {
     for(let i = 0; i< birthday.length-1; i++){
       const bd = (birthday[i]).replace('"', '').replace(' ', '')
       birthdayUsers.push(
-        <View style={styles.birthdayItem} key={Math.random()}>
-          <View style={styles.birthdayIcon}>
-            <FontAwesome name="birthday-cake" size={19} color="white" />
+        <View style={[styles.birthdayItem, {backgroundColor:theme.bottomNavigationColor}]} key={Math.random()}>
+          <View style={[styles.birthdayIcon,{backgroundColor:theme.iconColorBack}]}>
+            <FontAwesome name="birthday-cake" size={19} color={theme.iconColor} />
           </View> 
-          <View style={styles.birthdayText}><Text>{bd}</Text></View>
+          <View style={styles.birthdayText}><Text style={{color: theme.color}}>{bd}</Text></View>
         </View>
       )
     }
@@ -142,28 +172,29 @@ function BirthdayScreen({navigation}) {
 //--------- ИНДИКАТОР ЗАГРУЗКИ --------- //
   if(isLoading) {
     return(
-      <View style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
-        <WaveIndicator color="#D64D43"/>
+      <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+        <WaveIndicator color={theme.loading}/>
       </View>
     )
   }
 
   return (
-    <View>
+    <View style={{backgroundColor: isDarkMode === true ? '#262C38' : ''}}>
       <View style={styles.centered}>
         <View style={styles.dateContainer}>
           {/* <TouchableOpacity onPress={() => sendPushNotification()} ><Text>push to all users</Text></TouchableOpacity> */}
-          <Text style={styles.dateText}>{i18n.t('today')}: {date}</Text>
+          <Text style={[styles.dateText,{color:theme.color}]}>{i18n.t('today')}: {date}</Text>
         </View>
       </View>
-      <ScrollView style={styles.height100}>
+      <ScrollView style={styles.height100} showsVerticalScrollIndicator= {false}>
         <View style={styles.centered}>
           <View style={styles.width60}>
             {birthdayUsers}
           <View style={{marginBottom:80}}/>
           </View>
         </View>
-      </ScrollView>        
+
+      </ScrollView>    
     </View>
   );
 }
@@ -173,8 +204,7 @@ export default BirthdayScreen;
 const styles = StyleSheet.create({
   birthdayItem:{
     width: '100%', 
-    height:50, 
-    backgroundColor:'white', 
+    height:50,  
     borderRadius: 15, 
     alignItems:'center', 
     marginBottom: 10, 
@@ -182,7 +212,6 @@ const styles = StyleSheet.create({
     flexDirection:'row'
   },
   birthdayIcon:{
-    backgroundColor:'#D64D43', 
     width: 40, 
     height: 40, 
     borderRadius: 12, 
@@ -219,8 +248,7 @@ const styles = StyleSheet.create({
   },
   dateText:{
     fontSize: 17, 
-    fontWeight:'bold', 
-    color: "#4D4D4D"
+    fontWeight:'bold',
   },
   height100:{
     height:'100%'

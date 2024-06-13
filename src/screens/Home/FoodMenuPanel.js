@@ -7,6 +7,10 @@ import moment from 'moment';
 import qs from "qs"
 import axios from "axios"
 import { FontAwesome } from '@expo/vector-icons'; 
+import themeContext from '../../cores/themeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { WaveIndicator } from 'react-native-indicators';
+
 
 
 
@@ -38,6 +42,28 @@ LocaleConfig.locales['ru'] = {
 };
 
 export default function FoodMenuPanel({navigation}) {
+
+  const theme = useContext(themeContext)
+
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+
+
   const {iin} = useContext(AuthContext)
   const date = moment().format(`YYYY-MM-DD`)
 
@@ -46,7 +72,9 @@ export default function FoodMenuPanel({navigation}) {
   const [modalVisible1, setModalVisible1] = useState(false);
   const [menuStatus, setMenuStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoading1, setIsLoading1] = useState(false)
   const [ob, setOb] = useState('');
+  const [ menuNo, setMenuNo ] = useState([])
   // const [oab, setOab] = useState('');
   const [inputs, setInputs] = useState(
     {
@@ -65,6 +93,62 @@ export default function FoodMenuPanel({navigation}) {
     setInputs(prevState=>({...prevState, [input]: text}))
 }
 
+const checkIsHaveMenu = () => {
+  setIsLoading1(true)
+  const config = {
+    method:'get',
+    url: `http://95.57.218.120/?apitest.helloAPI5={}`,
+    headers: {  }
+  }
+  axios(config)
+   .then(function(response){
+    let info = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
+    let parse_first = JSON.parse(info)
+    let parse_second = JSON.parse(parse_first.response)
+    let parse_third = parse_second.status
+
+  //   console.log(parse_third === 'Сведений о сегодняшнем меню нет')
+      setMenuNo(parse_third)
+    
+
+      setIsLoading1(false)
+   })
+   .catch(function (error) {
+    console.log(error);
+    setIsLoading1(false)
+   })
+
+}
+const checkIsHaveMenuNoLoading = () => {
+  // setIsLoading1(true)
+  const config = {
+    method:'get',
+    url: `http://95.57.218.120/?apitest.helloAPI5={}`,
+    headers: {  }
+  }
+  axios(config)
+   .then(function(response){
+    let info = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
+    let parse_first = JSON.parse(info)
+    let parse_second = JSON.parse(parse_first.response)
+    let parse_third = parse_second.status
+
+  //   console.log(parse_third === 'Сведений о сегодняшнем меню нет')
+      setMenuNo(parse_third)
+    
+
+      // setIsLoading1(false)
+   })
+   .catch(function (error) {
+    console.log(error);
+    // setIsLoading1(false)
+   })
+
+}
+
+useEffect(()=>{
+  checkIsHaveMenu()
+},[])
 
 const foodAdd = () => {
   setIsLoading(true)
@@ -155,13 +239,17 @@ useEffect(()=>{
 
 // console.log(ob)
 
-
-
-
+if(isLoading1) {
+  return(
+      <View style={{flex: 1, justifyContent:'center', alignItems: 'center',backgroundColor: isDarkMode === true ? "#191E2D" : 'white' }}>
+          <WaveIndicator color={theme.loading}/>
+      </View>
+  )
+}
  
     return (
-      <ScrollView style={{height:'100%', backgroundColor: 'white' , opacity: modalVisible || modalVisible1 ? 0.1 : 1}} automaticallyAdjustKeyboardInsets={true} StickyHeaderComponent>
-<View style={{alignItems:'center', marginTop:10}} >
+      <ScrollView style={{height:'100%', backgroundColor: theme.background , opacity: modalVisible || modalVisible1 ? 0.1 : 1}} automaticallyAdjustKeyboardInsets={true} StickyHeaderComponent>
+{/* <View style={{alignItems:'center', marginTop:10}} >
       <View style={{width:windowWidth-20, flexDirection:'row', justifyContent:'space-around'}}>
         <TouchableOpacity style={{width:"45%", height:30, borderWidth:3, borderColor:'#D64D43', alignItems:'center', justifyContent:'center', borderRadius:10}} onPress = {() => {navigation.navigate('MenuHistory')}}>
           <Text style={{color:'#D64D43', fontWeight:'600'}}>История меню</Text>
@@ -171,232 +259,253 @@ useEffect(()=>{
         </TouchableOpacity>
       </View>
 
-</View>
+</View> */}
               
 
-      <View style={{ alignItems:'center', marginTop:20}}>
-        {/* <Text style={{fontSize:17, fontWeight:'600', marginBottom:10,marginTop:15, color:'#4d4d4d'}}>Выберите дату:</Text> */}
-        <TouchableOpacity 
-          style={{width:windowWidth-130, height:40, backgroundColor:'#B9B9B9', borderRadius:15, alignItems:'center', justifyContent:'center', flexDirection:'row'}}
-          onPress={()=>setModalVisible(true)}
-          >
-          <AntDesign name="calendar" size={20} color="white" />
-          <Text 
-            style={{fontSize:16, fontWeight:'500', color:"white", marginLeft:10}}>
-              Выберите дату
-            </Text>
-        </TouchableOpacity>
-
-<Text style={{fontSize:17, fontWeight:'600', marginBottom:10,marginTop:15, color:'#4d4d4d'}}>Введите меню:</Text>
-
-
-  
-      </View>
-      {/* <TextInput style={{width: 200, height:40, borderWidth:0.5, borderColor:'#4d4d4d', borderRadius:15, fontSize:16}}/> */}
-      <View style={{alignItems:'center'}}>
-    <View style={{ width: windowWidth-20, padding:15, borderRadius:5, borderWidth:0.5, marginTop:5}}>
-      <View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Салат №1:</Text>
-
-        </View>
-        <TextInput 
-        style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-        onChangeText={(text)=>handleOnChange(text, 'salat1')}
-        />
-
-      </View>
-
-      <View style={{flexDirection:'row', alignItems:'center'}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Салат №2:</Text>
-
-        </View>
-    <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-     onChangeText={(text)=>handleOnChange(text, 'salat2')}
-    />
-
-      </View>
-
-      <View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
-
-
-
-      <View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Первое блюдо №1:</Text>
-
-        </View>
-        <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-        onChangeText={(text)=>handleOnChange(text, 'perv1')}
-        />
-
-      </View>
-
-      <View style={{flexDirection:'row', alignItems:'center'}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Первое блюдо №2:</Text>
-
-        </View>
-    <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-    onChangeText={(text)=>handleOnChange(text, 'perv2')}
-    />
-
-      </View>
-
-      <View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
-
-
-      
-      <View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Второе блюдо №1:</Text>
-
-        </View>
-        <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-        onChangeText={(text)=>handleOnChange(text, 'sec1')}
-        />
-
-      </View>
-
-
-      
-      
-      <View style={{flexDirection:'row', alignItems:'center'}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Второе блюдо №2:</Text>
-
-        </View>
-        <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-        onChangeText={(text)=>handleOnChange(text, 'sec2')}
-        />
-
-      </View>
-
-      <View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
-
-
-      
-      {/* <KeyboardAvoidingView> */}
-      <View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Гарнир №1:</Text>
-
-        </View>
-        <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-        onChangeText={(text)=>handleOnChange(text, 'gar1')}
-        />
-
-      </View>
-        
-      {/* </KeyboardAvoidingView> */}
-      
-
-
-      
-      
-      <View style={{flexDirection:'row', alignItems:'center'}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Гарнир №2:</Text>
-
-        </View>
-        <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-        onChangeText={(text)=>handleOnChange(text, 'gar2')}
-        />
-
-      </View>
-
-      <View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
-
-
-
-      
-      
-      <View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
-        <View style={{width: 90, marginRight: 5}}>
-      <Text style={{fontSize:14, fontWeight:'500', color:'#4d4d4d',}}>Выпечка:</Text>
-
-        </View>
-        <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
-        onChangeText={(text)=>handleOnChange(text, 'vyp')}
-        />
-
-      </View>
-
-      <View style={{alignItems:'center'}}>
-      <TouchableOpacity style={{width: windowWidth-80, height: 50, backgroundColor:'#D64D43', alignItems:'center', justifyContent:'center', borderRadius:15, flexDirection:'row' }} onPress = {() => foodAdd()}  >
-      {isLoading === true ? <ActivityIndicator size="small" color="white" style={{ marginRight:10}} />:<></> }
-        <Text style={{color:'white', fontSize:17, fontWeight:'600'}}>Добавить</Text>
-      </TouchableOpacity>
-      </View>
-
-
-      
- 
-
- 
-
-      
-
-      
-    </View>
-    <View style={{marginBottom:40}}></View>
-
-      </View>
-
-      <Modal 
-            animationType="fade"
-            transparent={true}
-            visible={modalVisible}
-        >
-          <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
-          <View style={{width:windowWidth-20, backgroundColor:'white', alignItems:'center', padding:15, borderRadius:15, shadowColor:"#000", shadowOffset:{height:2}, shadowOpacity:0.2, shadowRadius:9, elevation:4}}>
-<Calendar
-      onDayPress={(day) => {setSelectedDate(day.dateString)}}
-      markedDates={{
-        [selectedDate]: {selected: true}
-      }}
-      // shouldRasterizeIOS={true}
-      style={{width:windowWidth-40, borderRadius: 5, borderColor:"#4d4d4d"}}
-      theme={{textDayFontWeight:'500', selectedDayTextColor:'white', selectedDayBackgroundColor:'#D64D43', todayTextColor:'#D64D43', textMonthFontWeight:'600', arrowColor:'#D64D43'}}
-    />
-
-    <TouchableOpacity style={{width:windowWidth-200, height:40, backgroundColor:'#D64D43', marginTop: 10, alignItems:'center', justifyContent:'center', borderRadius:15}} onPress={()=>setModalVisible(false)}>
-      <Text style={{fontSize:16, fontWeight:'500', color:'white'}}>
-        OK
+{menuNo === 'Сведений о сегодняшнем меню нет' 
+?
+<View>
+<View style={{ alignItems:'center', marginTop:0}}>
+  {/* <Text style={{fontSize:17, fontWeight:'600', marginBottom:10,marginTop:15, color:'#4d4d4d'}}>Выберите дату:</Text> */}
+  <Text style={{fontSize:17, fontWeight:'600', marginBottom:10,marginTop:5, color: theme.color}}>Введите меню:</Text>
+  <TouchableOpacity 
+    style={{width:windowWidth-130, height:40, backgroundColor:'#B9B9B9', borderRadius:15, alignItems:'center', justifyContent:'center', flexDirection:'row', marginBottom:10}}
+    onPress={()=>setModalVisible(true)}
+    >
+    <AntDesign name="calendar" size={20} color="white" />
+    <Text 
+      style={{fontSize:16, fontWeight:'500', color:"white", marginLeft:10}}>
+        Выберите дату
       </Text>
-
-    </TouchableOpacity>
-
-          </View>
-
-          </View>
+  </TouchableOpacity>
 
 
-        </Modal>
 
-        <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={modalVisible1}
-        >
-                    <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <FontAwesome name="check-circle" size={130} color="#57CF2D" />
-                        <View style={{flexDirection:'column', alignItems:'center'}}>
-                          <Text style={{fontSize:16, fontWeight:'600', marginBottom:10, marginTop:10, color:'#57CF2D'}}>{menuStatus}</Text>
 
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress={() => {setModalVisible1(!modalVisible1); setMenuStatus(''); navigation.navigate('MenuHistory')}}
-                        >
-                            <Text style={styles.textStyle}>Проверить история меню</Text>
-                        </Pressable>
 
-                        </View>
-                    </View>
-                    </View>
-          </Modal>
+</View>
+{/* <TextInput style={{width: 200, height:40, borderWidth:0.5, borderColor:'#4d4d4d', borderRadius:15, fontSize:16}}/> */}
+<View style={{alignItems:'center'}}>
+<View style={{ width: windowWidth-20, padding:15, borderRadius:5, borderWidth:0.5, borderColor: theme.color, marginTop:5}}>
+<View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color}}>Салат №1:</Text>
+
+  </View>
+  <TextInput 
+  style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+  onChangeText={(text)=>handleOnChange(text, 'salat1')}
+  />
+
+</View>
+
+<View style={{flexDirection:'row', alignItems:'center'}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Салат №2:</Text>
+
+  </View>
+<TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+onChangeText={(text)=>handleOnChange(text, 'salat2')}
+/>
+
+</View>
+
+<View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
+
+
+
+<View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Первое блюдо №1:</Text>
+
+  </View>
+  <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+  onChangeText={(text)=>handleOnChange(text, 'perv1')}
+  />
+
+</View>
+
+<View style={{flexDirection:'row', alignItems:'center'}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Первое блюдо №2:</Text>
+
+  </View>
+<TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+onChangeText={(text)=>handleOnChange(text, 'perv2')}
+/>
+
+</View>
+
+<View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
+
+
+
+<View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Второе блюдо №1:</Text>
+
+  </View>
+  <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+  onChangeText={(text)=>handleOnChange(text, 'sec1')}
+  />
+
+</View>
+
+
+
+
+<View style={{flexDirection:'row', alignItems:'center'}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Второе блюдо №2:</Text>
+
+  </View>
+  <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+  onChangeText={(text)=>handleOnChange(text, 'sec2')}
+  />
+
+</View>
+
+<View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
+
+
+
+{/* <KeyboardAvoidingView> */}
+<View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Гарнир №1:</Text>
+
+  </View>
+  <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+  onChangeText={(text)=>handleOnChange(text, 'gar1')}
+  />
+
+</View>
+  
+{/* </KeyboardAvoidingView> */}
+
+
+
+
+
+<View style={{flexDirection:'row', alignItems:'center'}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Гарнир №2:</Text>
+
+  </View>
+  <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+  onChangeText={(text)=>handleOnChange(text, 'gar2')}
+  />
+
+</View>
+
+<View style={{width:'100%', height:0.5, backgroundColor:'grey', marginTop:10, marginBottom:10}}></View>
+
+
+
+
+
+<View style={{flexDirection:'row', alignItems:'center', marginBottom:10}}>
+  <View style={{width: 90, marginRight: 5}}>
+<Text style={{fontSize:14, fontWeight:'500', color: theme.color,}}>Выпечка:</Text>
+
+  </View>
+  <TextInput style={{width: 200, height:30, borderRadius:15, fontSize:14, backgroundColor:'white', borderWidth:0.5, borderColor:'grey', paddingLeft:10, paddingRight:10}}
+  onChangeText={(text)=>handleOnChange(text, 'vyp')}
+  />
+
+</View>
+
+<View style={{alignItems:'center'}}>
+<TouchableOpacity 
+disabled={isLoading === false ? false : true}
+style={{width: windowWidth-80, height: 50, backgroundColor: isLoading === false ? theme.loading : '#B8B8B8', alignItems:'center', justifyContent:'center', borderRadius:15, flexDirection:'row' }} onPress = {() => foodAdd()}  >
+{ isLoading === true 
+  ? <ActivityIndicator size="small" color="white" style={{ marginRight:10}} />
+  :<Text style={{color:theme.background, fontSize:17, fontWeight:'600'}}>Добавить</Text> 
+}
+</TouchableOpacity>
+</View>
+
+
+
+
+
+
+
+
+
+
+</View>
+<View style={{marginBottom:40}}></View>
+
+</View>
+
+<Modal 
+      animationType="fade"
+      transparent={true}
+      visible={modalVisible}
+  >
+    <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+    <View style={{width:windowWidth-20, backgroundColor:'white', alignItems:'center', padding:15, borderRadius:15, shadowColor:"#000", shadowOffset:{height:2}, shadowOpacity:0.2, shadowRadius:9, elevation:4}}>
+<Calendar
+onDayPress={(day) => {setSelectedDate(day.dateString)}}
+markedDates={{
+  [selectedDate]: {selected: true}
+}}
+// shouldRasterizeIOS={true}
+style={{width:windowWidth-40, borderRadius: 5, borderColor:"#4d4d4d"}}
+theme={{textDayFontWeight:'500', selectedDayTextColor:'white', selectedDayBackgroundColor:'#D64D43', todayTextColor:'#D64D43', textMonthFontWeight:'600', arrowColor:'#D64D43'}}
+/>
+
+<TouchableOpacity style={{width:windowWidth-200, height:40, backgroundColor:'#D64D43', marginTop: 10, alignItems:'center', justifyContent:'center', borderRadius:15}} onPress={()=>setModalVisible(false)}>
+<Text style={{fontSize:16, fontWeight:'500', color:'white'}}>
+  OK
+</Text>
+
+</TouchableOpacity>
+
+    </View>
+
+    </View>
+
+
+  </Modal>
+
+  <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible1}
+  >
+              <View style={styles.centeredView}>
+              <View style={[styles.modalView, {backgroundColor: theme.background}]}>
+              <FontAwesome name="check-circle" size={130} color="#57CF2D" />
+                  <View style={{flexDirection:'column', alignItems:'center'}}>
+                    <Text style={{fontSize:16, fontWeight:'600', marginBottom:10, marginTop:10, color:'#57CF2D'}}>{menuStatus}</Text>
+
+                  <Pressable
+                      style={[styles.button, styles.buttonClose,{backgroundColor: theme.background, borderColor: theme.loading}]}
+                      onPress={() => {setModalVisible1(!modalVisible1); setMenuStatus(''); navigation.navigate('MenuHistory'); checkIsHaveMenuNoLoading()}}
+                  >
+                      <Text style={[styles.textStyle,{color: theme.loading}]}>Проверить история меню</Text>
+                  </Pressable>
+
+                  </View>
+              </View>
+              </View>
+    </Modal>
+
+        </View>
+ : 
+ <View style={{alignItems:'center', flex:1}}>
+  <View style={{marginTop:40}}>
+  <Text style={{fontSize:18, fontWeight:'600', color:theme.color}}>Вы сегодня уже добавили</Text>
+  <TouchableOpacity style={{padding:15, backgroundColor: theme.loading, alignItems:'center', justifyContent:'center', borderRadius:15, marginTop:15}} onPress={()=> navigation.navigate('MenuHistory')}>
+    <Text style={{fontSize:16, color:theme.background, fontWeight:'600'}}>Проверить история меню</Text>
+  </TouchableOpacity>
+  </View>
+  </View>
+ }
+
 
 
       </ScrollView>

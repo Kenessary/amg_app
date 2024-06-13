@@ -10,11 +10,34 @@ import moment from 'moment';
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import themeContext from '../../cores/themeContext';
+import { StatusBar } from 'expo-status-bar';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function NotificationHistory({navigation}) {
+
+
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  });
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+
   const [isLoading, setIsLoading] = useState(false)
   const [historyNotification, setHistoryNotification] = useState('')
   const [historyStatus, setHistoryStatus] = useState('')
@@ -106,6 +129,7 @@ const getData = () => {
       let parsed = JSON.parse(user)
       let parsedL = parsed.list
       let status_parsed = parsed.status
+      console.log(parsedL)
       
       
       // setHNotification(parsedL)
@@ -118,12 +142,12 @@ const getData = () => {
           type: list.type,
           date: (list.date).split(' ')[0],
           hour: (list.date).split(' ')[1], 
-          
         }
       })
 
       setHistoryStatus(status_parsed)
       setHistoryNotification(newArray)
+      // console.log(newArray)
       setIsLoading(false)
       })
       .catch(function(error){
@@ -147,10 +171,12 @@ const getData = () => {
 
       <View key={i}>
 
+<StatusBar style= {isDarkMode ? 'light' : 'dark' } />
+
       <View style={{flexDirection:'row', marginBottom:30, marginLeft:10}}>
         
 
-<View style={{width:40, height:40, backgroundColor:'#F4F4F4', borderRadius:10, marginTop:2, alignItems:'center', justifyContent:'center'}}>
+<View style={{width:40, height:40, backgroundColor: isDarkMode === true ? '#1C3F5C' : '#f4f4f4' , borderRadius:10, marginTop:2, alignItems:'center', justifyContent:'center'}}>
  <MaterialIcons name={ 
   historyNotification[i].type === 'message' 
   ? 'forum' 
@@ -160,28 +186,28 @@ const getData = () => {
   ? 'system-update' 
   : historyNotification[i].type === 'edo' 
   ? 'insert-drive-file' 
-  : '' } size={24} color="grey" /> 
+  : '' } size={24} color={isDarkMode === true ? '#C0D5EE' : 'grey'} /> 
 
 </View>
-        <View style={{width:windowWidth-70, backgroundColor:'#F5F5F5', marginLeft:8, padding:10, paddingLeft:20, paddingRight:20, borderRadius:16}}>
+        <View style={{width:windowWidth-70, backgroundColor: theme.notificationCardColor, marginLeft:8, padding:10, paddingLeft:20, paddingRight:20, borderRadius:16}}>
           <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-            <Text style={{fontSize:18, fontWeight:'600', color:'#4d4d4d'}}>{historyNotification[i].title}</Text>
+            <Text style={{fontSize:18, fontWeight:'600', color: theme.color}}>{historyNotification[i].title}</Text>
 
             <View style={{flexDirection:'row', alignItems:'center', display: historyNotification[i].opened === 0 ? 'flex' : 'none' }}>
-            <Text style={{fontSize:16, fontWeight:'400', color:'#4d4d4d', marginRight:5}}>Новое</Text>
+            <Text style={{fontSize:16, fontWeight:'400', color: theme.color, marginRight:5}}>Новое</Text>
             <View style={{width:10, height:10, backgroundColor:'#25AD03', borderRadius:10}}></View>
             </View>
 
           </View>
 
           <View style={{marginTop:5}}>
-            <Text style={{fontSize:16, fontWeight:'400', color:'#4d4d4d'}}>{historyNotification[i].body}</Text>
+            <Text style={{fontSize:16, fontWeight:'400', color: theme.color}}>{historyNotification[i].body}</Text>
           </View>
 
          {
           historyNotification[i].type !== 'edo' && historyNotification[i].type !== 'message'
           ? <TouchableOpacity 
-              style={{marginTop:15, width:'100%', alignItems:'center', backgroundColor:'#D64D43', padding:8,borderRadius:10}} 
+              style={{marginTop:15, width:'100%', alignItems:'center', backgroundColor: isDarkMode ? '#C0D5EE' : '#D64D43', padding:8,borderRadius:10}} 
               onPress={()=> historyNotification[i].type === 'menu' 
               ? navigation.navigate('FoodMenuScreen') 
               : (Platform.OS === 'ios' 
@@ -190,12 +216,12 @@ const getData = () => {
                 )
               }
             >
-            <Text style={{fontSize:16, fontWeight:'400', color:'white'}}>{historyNotification[i].type === 'menu' ? 'Меню': historyNotification[i].type === 'update' ? 'Обновить приложения' : '' }</Text>
+            <Text style={{fontSize:16, fontWeight:'400', color: isDarkMode === true ? '' :'white'}}>{historyNotification[i].type === 'menu' ? 'Меню': historyNotification[i].type === 'update' ? 'Обновить приложения' : '' }</Text>
           </TouchableOpacity> : <></> } 
 
           <View style={{justifyContent:'space-between', marginTop:10, flexDirection:'row'}}>
             <View>
-              <Text style={{fontSize:13, fontWeight:'400', color:'#4d4d4d'}}>
+              <Text style={{fontSize:13, fontWeight:'400', color: theme.color}}>
                 { 
                   historyNotification[i].date === date 
                   ? i18n.t('today') 
@@ -207,7 +233,7 @@ const getData = () => {
             </View>
 
             <View>
-              <Text style={{fontSize:13, fontWeight:'400', color:'#4d4d4d'}}>{time[0]}:{time[1]}</Text>
+              <Text style={{fontSize:13, fontWeight:'400', color: theme.color}}>{time[0]}:{time[1]}</Text>
             </View>
           </View>
         
@@ -221,17 +247,17 @@ const getData = () => {
 
   if(isLoading) {
     return(
-        <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor:'white'}}>
-            <WaveIndicator color="#D64D43"/>
-        </View>
+      <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+      <WaveIndicator color={theme.loading}/>
+    </View>
     )
   }
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, {backgroundColor: theme.background}]}>
         <View style={{alignItems:'center', marginBottom:20}}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{i18n.t('notification')}</Text>
+          <Text style={[styles.headerTitle, {color: theme.color}]}>{i18n.t('notification')}</Text>
         </View>
         </View>
         <View>
@@ -239,7 +265,7 @@ const getData = () => {
           <ScrollView>
             {/* {notifications} */}
 
-      {historyStatus !== "Нет данных" ? notifications : <View style={{alignItems:'center'}}><Text style={{fontSize:22, color:'#4d4d4d', fontWeight:'600'}}> <Entypo name="archive" size={28} color="#4d4d4d" style={{marginRight:5}} /> {historyStatus}</Text></View>}
+      {historyStatus !== "Нет данных" ? notifications : <View style={{alignItems:'center'}}><Text style={{fontSize:22, color:theme.color, fontWeight:'600'}}> <Entypo name="archive" size={28} color={theme.color} style={{marginRight:5}} /> {historyStatus}</Text></View>}
       <View style={{marginBottom:150}}></View>
 
           </ScrollView>
@@ -292,7 +318,6 @@ const getData = () => {
 
 const styles = StyleSheet.create({
   container:{
-    backgroundColor:'white',
     width: windowWidth, 
     height: windowHeight
   },
@@ -305,7 +330,6 @@ const styles = StyleSheet.create({
   },
   headerTitle:{
     fontSize: 24,
-    color: "#4D4D4D",
     fontWeight:"bold",
   },
   socialnet:{

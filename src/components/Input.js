@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import COLORS from '../cores/theme';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import themeContext from '../cores/themeContext';
 
 const Input = ({ 
     label, 
@@ -13,9 +14,10 @@ const Input = ({
 }) => {
     const [isFocused, setIsFocused] = React.useState(false)
     const [hidePassword, setHidePassword] = React.useState(password)
+    const theme = useContext(themeContext)
     return (
         <View style={{marginBottom: 20}}>
-            <Text style={style.label}>{label}</Text>
+            <Text style={[style.label, {color: theme.color}]}>{label}</Text>
             <View 
                 style={[
                     style.inputContainer, 
@@ -64,8 +66,7 @@ const Input = ({
 const style = StyleSheet.create({
     label: {
         marginVertical: 5,
-        fontSize: 14,
-        color: COLORS.grey
+        fontSize: 14
     },
     inputContainer: {
         height: 48,

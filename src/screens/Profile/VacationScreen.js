@@ -7,12 +7,37 @@ import { kz, ru, ch } from '../../languages/localizations';
 import axios from 'axios';
 import qs from 'qs';
 import i18n from 'i18n-js'
+import themeContext from '../../cores/themeContext';
+
 
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function VacationScreen({navigation}){
+
+  
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  globalThis.dm = isDarkMode
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+  
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+
   let [locale, setLocale] = useState('');
   let [lang, setLang] = useState('')
 
@@ -80,19 +105,19 @@ export default function VacationScreen({navigation}){
 
   if(isLoading) {
     return(
-      <View style={styles.indicator}>
-        <WaveIndicator color="#D64D43"/>
-      </View>
+      <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+      <WaveIndicator color={theme.loading}/>
+    </View>
     )
   }
 
   const vacation = []
   for (let i = 0; i < otpusk.length; i++){
     vacation.push(
-      <View key={i}  style={styles.card}>
-        <View style={styles.cardHeader} >
+      <View key={i}  style={{...styles.card, backgroundColor: isDarkMode ? '#1C3F5C' : '#F4F4F4' }}>
+        <View style={{...styles.cardHeader, backgroundColor: isDarkMode === true ? '#C0D5EE' : '#D64D43'}} >
           <View style={styles.cardHeaderInside}>
-            <Text style={styles.cardHeaderText}>
+            <Text style={{...styles.cardHeaderText, color: theme.background}}>
               {((otpusk[i].vid).charAt(0)).toUpperCase()  + (otpusk[i].vid).slice(1)}
             </Text>
           </View>
@@ -100,10 +125,10 @@ export default function VacationScreen({navigation}){
         <View style={styles.cardBodyField}>
           <View style={styles.cardBody20}>
             <View style={styles.paragraphField}>
-              <Text>{i18n.t('nachOtpusk')}</Text>
+              <Text style={{color: theme.color}}>{i18n.t('nachOtpusk')}</Text>
             </View>
             <View style={styles.paragraphNachalo}>
-              <Text style={styles.paragraphNachaloText}>
+              <Text style={{color: theme.color}}>
                 {((otpusk[i].nachalo).split(' ')[0]).split('-')[2]}.
                 {((otpusk[i].nachalo).split(' ')[0]).split('-')[1]}.
                 {((otpusk[i].nachalo).split(' ')[0]).split('-')[0]}
@@ -112,10 +137,10 @@ export default function VacationScreen({navigation}){
           </View>
           <View style={styles.cardBody20}>
             <View style={styles.paragraphField}>
-              <Text>{i18n.t('konOtpusk')}</Text>
+              <Text style={{color:theme.color}}>{i18n.t('konOtpusk')}</Text>
             </View>
             <View style={styles.paragraphKonec}>
-              <Text style={styles.paragraphNachaloText}>
+              <Text style={{color:theme.color}}>
                 {((otpusk[i].konec).split(' ')[0]).split('-')[2]}.
                 {((otpusk[i].konec).split(' ')[0]).split('-')[1]}.
                 {((otpusk[i].konec).split(' ')[0]).split('-')[0]}
@@ -124,50 +149,50 @@ export default function VacationScreen({navigation}){
           </View>
           <View style={styles.cardBody20}>
             <View style={styles.paragraphField}>
-              <Text>{i18n.t('dniOtpusk')}</Text>
+              <Text style={{color:theme.color}}>{i18n.t('dniOtpusk')}</Text>
             </View>
             <View style={styles.paragraphText}>
-              <Text>{otpusk[i].dni}</Text>
+              <Text style={{color:theme.color}}>{otpusk[i].dni}</Text>
             </View>
           </View>
           <View style={styles.cardBody40}>
             <View style={styles.paragraphField}>
-              <Text>{i18n.t('zaNapr')}</Text>
+              <Text style={{color:theme.color}}>{i18n.t('zaNapr')}</Text>
             </View>
             <View style={styles.paragraphText}>
-              <Text>{otpusk[i].naprezhonnost}</Text>
+              <Text style={{color:theme.color}}>{otpusk[i].naprezhonnost}</Text>
             </View>
           </View>
           <View style={styles.cardBody20}>
             <View style={styles.paragraphField}>
-              <Text>{i18n.t('zaTyazh')}</Text>
+              <Text style={{color:theme.color}}>{i18n.t('zaTyazh')}</Text>
             </View>
             <View style={styles.paragraphText}>
-              <Text>{otpusk[i].tyazh}</Text>
+              <Text style={{color:theme.color}}>{otpusk[i].tyazh}</Text>
             </View>
           </View>
           <View style={styles.cardBody40}>
             <View style={styles.paragraphField}>
-              <Text>{i18n.t('zaAral')}</Text>
+              <Text style={{color:theme.color}}>{i18n.t('zaAral')}</Text>
             </View>
             <View style={styles.paragraphText}>
-              <Text>{otpusk[i].priarale}</Text>
+              <Text style={{color:theme.color}}>{otpusk[i].priarale}</Text>
             </View>
           </View>
           <View style={styles.cardBody20}>
             <View style={styles.paragraphField}>
-              <Text>{i18n.t('zaInvalid')}</Text>
+              <Text style={{color:theme.color}}>{i18n.t('zaInvalid')}</Text>
             </View>
             <View style={styles.paragraphText}>
-              <Text>{otpusk[i].invalidnost}</Text>
+              <Text style={{color:theme.color}}>{otpusk[i].invalidnost}</Text>
             </View>
           </View>
           <View style={styles.cardBody20}>
             <View style={styles.paragraphField}>
-            <Text>{i18n.t('zaDrugie')}</Text>
+            <Text style={{color:theme.color}}>{i18n.t('zaDrugie')}</Text>
             </View>
             <View style={styles.paragraphText}>
-              <Text>{otpusk[i].drugie}</Text>
+              <Text style={{color:theme.color}}>{otpusk[i].drugie}</Text>
             </View>
           </View>
         </View>
@@ -175,7 +200,7 @@ export default function VacationScreen({navigation}){
   )}
 
   return (
-    <View style={styles.container} >      
+    <View style={{...styles.container, backgroundColor: theme.background}} >      
       <ScrollView  style={{ width: "100%", marginTop:20}} >
         <View style={{alignItems:'center'}}>
           {vacation}
@@ -187,7 +212,6 @@ export default function VacationScreen({navigation}){
 
 const styles = StyleSheet.create({
   container:{
-    backgroundColor:'white',
     width: windowWidth, 
     height: '100%',
     // marginTop:20
@@ -216,14 +240,13 @@ const styles = StyleSheet.create({
     width: windowWidth-40, 
     marginBottom:15, 
     height: 320, 
-    backgroundColor:'#F4F4F4', 
     alignItems:'center', 
     borderRadius: 15
   },
   cardHeader:{
     width: '100%', 
     height: 60, 
-    backgroundColor:'#D64D43',
+    // backgroundColor:'#D64D43',
     borderTopRightRadius: 10, 
     borderTopLeftRadius: 10, 
     justifyContent:'center'
@@ -235,9 +258,7 @@ const styles = StyleSheet.create({
     marginLeft: 20
   },
   cardHeaderText:{
-    color: '#4D4D4D', 
     fontSize: 16,
-    color:'white', 
     fontWeight:'bold'
   },
   cardBodyField: {
@@ -265,9 +286,6 @@ const styles = StyleSheet.create({
     backgroundColor:'#229B18',  
     alignItems:'center', 
     borderRadius: 5
-  },
-  paragraphNachaloText:{
-    color: 'white'
   },
   paragraphKonec:{
     width: '30%',

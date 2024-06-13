@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Dimensions, Text, View, ScrollView, StyleSheet} from 'react-native';
 import { WaveIndicator } from 'react-native-indicators';
 import { ImageSlider } from './ImageSlider';
 
+import LottieView from "lottie-react-native"
+
 
 import axios, * as others from 'axios';
 import Infodep from './Infodep';
+import themeContext from '../../cores/themeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const cheerio = require("cheerio");
 
 const windowWidth = Dimensions.get('window').width;
@@ -21,6 +25,27 @@ const videos = []
 // console.log(videos)
 
 export default function SingleNewsScreen ()  {
+
+  const theme = useContext(themeContext)
+
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+
   const [ isLoading, setIsLoading ] = useState(false)
   const [subtitle, setSubtitle] = useState('')
   const [newtitle, setNewTitle] = useState('')
@@ -115,9 +140,9 @@ useEffect(()=>{
 
 if(isLoading) {
   return(
-    <View style={styles.indicator}>
-      <WaveIndicator color="#D64D43"/>
-    </View>
+    <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+    <WaveIndicator color={theme.loading}/>
+  </View>
   )
 }
 
@@ -135,13 +160,13 @@ if(isLoading) {
   for (let i=0; i< paragraph.length; i++){
     newParagraph.push(
       <View key={i} style={{width: windowWidth-30, marginTop: 10}}>
-        <Text style={{fontSize: 15, fontWeight:'400', textAlign:'justify', letterSpacing:-0.2}}>  {paragraph[i].prt}</Text>
+        <Text style={{fontSize: 15, fontWeight:'400', textAlign:'justify', letterSpacing:-0.2, color: theme.color}}>  {paragraph[i].prt}</Text>
       </View>
     )
   }
 
   return (
-    <View style={{width:"100%", alignItems:'center'}}>
+    <View style={{width:"100%", alignItems:'center', backgroundColor: theme.background}}>
       <ScrollView >
         
       <View style={{width:windowWidth}}>
@@ -160,7 +185,7 @@ if(isLoading) {
         </View>
 
         <View style={{width: windowWidth-30, marginTop: 5}}>
-          <Text style={{fontSize: 14, fontWeight:'500', textAlign:'right'}}>{newDate}</Text>
+          <Text style={{fontSize: 14, fontWeight:'500', textAlign:'right', color: theme.color}}>{newDate}</Text>
         </View>
           {newParagraph}
           <View style={{width: windowWidth-30, marginTop: 10}}/>
@@ -178,7 +203,8 @@ const styles = StyleSheet.create({
     flex: 1, 
     justifyContent:'center', 
     alignItems: 'center', 
-    backgroundColor:'white'
+    width:'100%',
+    height:"100%"
   },
 
 })

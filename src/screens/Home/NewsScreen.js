@@ -1,5 +1,5 @@
 import { Text, View,  Dimensions, TouchableOpacity, StyleSheet, ScrollView} from 'react-native'
-import React, { Component, useEffect, useState } from 'react'
+import React, { Component, useContext, useEffect, useState } from 'react'
 import BackButton from '../../components/BackButton';
 import { WaveIndicator } from 'react-native-indicators';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ const cheerio = require("cheerio");
 
 const url = "http://www.cnpc-amg.kz/?p=nov_list"
 
+import LottieView from "lottie-react-native"
 
 
 const windowWidth = Dimensions.get('window').width;
@@ -20,9 +21,29 @@ const news_data = []
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+import themeContext from '../../cores/themeContext';
 
 
 export default function NewsScreen({navigation}){
+  const theme = useContext(themeContext)
+
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
 
    
   let [locale, setLocale] = useState('');
@@ -105,9 +126,9 @@ useEffect(()=>{
 
 if(isLoading) {
   return(
-    <View style={styles.indicator}>
-      <WaveIndicator color="#D64D43"/>
-    </View>
+    <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+    <WaveIndicator color={theme.loading}/>
+  </View>
   )
 }
 
@@ -116,19 +137,19 @@ for (let i=0; i < news_data.length / 20; i++){
   newscp.push(
     <View key={i} style={{ marginTop: 10}}>
     <TouchableOpacity onPress = {() => {navigation.navigate('SingleNewsScreen'), setLink(news_data[i].href)}}>
-    <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor: "white", paddingLeft: 15, paddingRight:15, paddingTop:15, borderTopLeftRadius:15, borderTopRightRadius: 15 }}>
-     <Text style={{color: '#4D4D4D', fontSize:15,textAlign:'left',fontStyle:'italic'}} > {(news_data[i]).label} </Text>
+    <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor:theme.bottomNavigationColor, paddingLeft: 15, paddingRight:15, paddingTop:15, borderTopLeftRadius:15, borderTopRightRadius: 15 }}>
+     <Text style={{color: theme.color, fontSize:15,textAlign:'left',fontStyle:'italic'}} > {(news_data[i]).label} </Text>
        </View>
-         <View style={{ width: windowWidth-20, marginBottom:0, backgroundColor:'white', alignItems:'center', padding: 15}}>
+         <View style={{ width: windowWidth-20, marginBottom:0,backgroundColor:theme.bottomNavigationColor, alignItems:'center', padding: 15}}>
        <View style={{width:windowWidth-20, paddingLeft:15, paddingRight:15}}>
-           <Text style={{color: '#4D4D4D', fontSize:15,textAlign:'left'}}>
+           <Text style={{color: theme.color, fontSize:15,textAlign:'left'}}>
            {(news_data[i].title).replace((news_data[i]).label, '')}
            </Text>
        </View>
      </View> 
-     <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor: "white", paddingLeft: 15, paddingRight:15, paddingBottom:15, borderBottomEndRadius: 15, borderBottomStartRadius:15 }}>
-         <View style={{backgroundColor:'#DC675F', width: 90, alignItems:'center',justifyContent:'center', borderRadius: 5,}} >
-             <Text style={{color: '#4D4D4D', fontSize:14, color:'white'}}>
+     <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor:theme.bottomNavigationColor, paddingLeft: 15, paddingRight:15, paddingBottom:15, borderBottomEndRadius: 15, borderBottomStartRadius:15 }}>
+         <View style={{backgroundColor: theme.dateBack, width: 90, alignItems:'center',justifyContent:'center', borderRadius: 5,}} >
+             <Text style={{color:theme.color, fontSize:14, color:'white'}}>
              {(news_data[i]).date}
              </Text>
          </View>
@@ -153,19 +174,19 @@ for (let i=0; i < news_data.length; i++){
   newscpFull.push(
     <View key={i} style={{ marginTop: 10}}>
     <TouchableOpacity onPress = {() => {navigation.navigate('SingleNewsScreen'), setLink(news_data[i].href)}}>
-    <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor: "white", paddingLeft: 15, paddingRight:15, paddingTop:15, borderTopLeftRadius:15, borderTopRightRadius: 15 }}>
-     <Text style={{color: '#4D4D4D', fontSize:15,textAlign:'left',fontStyle:'italic'}} > {(news_data[i]).label} </Text>
+    <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor:theme.bottomNavigationColor, paddingLeft: 15, paddingRight:15, paddingTop:15, borderTopLeftRadius:15, borderTopRightRadius: 15 }}>
+     <Text style={{color:theme.color, fontSize:15,textAlign:'left',fontStyle:'italic'}} > {(news_data[i]).label} </Text>
        </View>
-         <View style={{ width: windowWidth-20, marginBottom:0, backgroundColor:'white', alignItems:'center', padding: 15}}>
+         <View style={{ width: windowWidth-20, marginBottom:0, backgroundColor:theme.bottomNavigationColor, alignItems:'center', padding: 15}}>
        <View style={{width:windowWidth-20, paddingLeft:15, paddingRight:15}}>
-           <Text style={{color: '#4D4D4D', fontSize:15,textAlign:'left'}}>
+           <Text style={{color:theme.color, fontSize:15,textAlign:'left'}}>
            {(news_data[i].title).replace((news_data[i]).label, '')}
            </Text>
        </View>
      </View> 
-     <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor: "white", paddingLeft: 15, paddingRight:15, paddingBottom:15, borderBottomEndRadius: 15, borderBottomStartRadius:15 }}>
-         <View style={{backgroundColor:'#DC675F', width: 90, alignItems:'center',justifyContent:'center', borderRadius: 5,}} >
-             <Text style={{color: '#4D4D4D', fontSize:14, color:'white'}}>
+     <View style={{flexDirection:'row', width: windowWidth-20, marginTop: 0,justifyContent:'space-between',backgroundColor:theme.bottomNavigationColor, paddingLeft: 15, paddingRight:15, paddingBottom:15, borderBottomEndRadius: 15, borderBottomStartRadius:15 }}>
+         <View style={{backgroundColor: theme.dateBack, width: 90, alignItems:'center',justifyContent:'center', borderRadius: 5,}} >
+             <Text style={{color:theme.color, fontSize:14, color:'white'}}>
              {(news_data[i]).date}
              </Text>
          </View>
@@ -184,7 +205,7 @@ for (let i=0; i < news_data.length; i++){
 }
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container,{backgroundColor: isDarkMode === true ? '#262C38' : '#F2F2F2'}]}>
         <View style={{flexDirection:'row',  marginTop:10, width: windowWidth-30, alignItems:'center', marginLeft: 15}}>
         </View>
         <ScrollView  style={{ width: "100%", height: '100%'}} fadingEdgeLength={0} >

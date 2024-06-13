@@ -1,5 +1,5 @@
 import { Text, TouchableOpacity, View, Dimensions } from 'react-native'
-import React, { Component, useEffect, useState } from 'react'
+import React, { Component, useContext, useEffect, useState } from 'react'
 import Input from '../../components/Input'
 import { WaveIndicator } from 'react-native-indicators';
 import axios from "axios";
@@ -7,6 +7,10 @@ import qs from "qs"
 import moment from 'moment';
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import themeContext from '../../cores/themeContext';
+
+
+
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -23,6 +27,24 @@ export default function PushSendScreen(){
     const [isLoading, setIsLoading] = useState(false)
     const [isLoading1, setIsLoading1] = useState(false)
 
+    const theme = useContext(themeContext)
+    const [isDarkMode, setIsDarkMode] = useState(false)
+  
+    useEffect(() => {
+      // Load the user's preference from AsyncStorage
+      loadDarkModePreference();
+    });
+  
+    const loadDarkModePreference = async () => {
+      try {
+        const preference = await AsyncStorage.getItem('darkMode');
+        if (preference !== null) {
+          setIsDarkMode(JSON.parse(preference));
+        }
+      } catch (error) {
+        console.log('Error loading dark mode preference:', error);
+      }
+    };
     
 
     const getData = () => { 
@@ -176,8 +198,7 @@ async function sendPushForApp () {
         let user = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
         let parsed = JSON.parse(user)
         // console.log(parsed)
-
-        console.log(subArraysIin[i][j]) 
+ 
         if(subArraysIin[i][j] === subArraysIin[subArraysIin.length - 1][subArraysIin[subArraysIin.length - 1].length - 1]){
           sendPushNotificationForApparat()
           setIsLoading1(false)
@@ -234,6 +255,8 @@ async function sendPushForApp () {
             let newArrayIin = filteredData.map((list)=>{
               return list.iin
           })
+
+          // console.log(newArrayIin.length)
             let newArrayFull = parsedList.map((list)=>{
               return {pushtoken:list.pushtoken, fio: list.fio, date: list.date, apparat: list.apparat }
           })
@@ -264,22 +287,22 @@ async function sendPushForApp () {
 
   if(subArrays.length === 0) {
     return(
-      <View style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
-        <WaveIndicator color="#D64D43"/>
-      </View>
+      <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+      <WaveIndicator color={theme.loading}/>
+    </View>
     )
   }
 
   if(isLoading1) {
     return(
-      <View style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
-        <WaveIndicator color="#D64D43"/>
-      </View>
+      <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+      <WaveIndicator color={theme.loading}/>
+    </View>
     )
   }
 
     return (
-      <View style={{backgroundColor:"white", height:'100%'}}>
+      <View style={{backgroundColor:theme.background, height:'100%'}}>
         <View style={{alignItems:'center'}}>
           <View style={{width:windowWidth-30}}>
             <Input 
@@ -308,7 +331,7 @@ async function sendPushForApp () {
         </View>
         <View style={{alignItems:'center', justifyContent:'center', marginTop:10}}>
           <View style={{width:windowWidth-60, height:50, borderWidth:2, alignItems:'center', justifyContent:'center', borderColor:'red', borderRadius:15}}>
-            <Text style={{fontSize:16}}>Количество пользователей: {pushes.length}</Text>
+            <Text style={{fontSize:16, color: theme.color}}>Количество пользователей: {pushes.length}</Text>
           </View>
         </View>
       </View>

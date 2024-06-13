@@ -18,9 +18,11 @@ import axios from "axios";
 import qs from "qs"
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+import themeContext from "../../cores/themeContext";
 
 
 export default function RegisterScreen({navigation}){
+    const theme = useContext(themeContext)
     const [inputs, setInputs] = React.useState({
         iin: '',
         tel: '',
@@ -190,7 +192,7 @@ export default function RegisterScreen({navigation}){
     }
 
     return (
-    <SafeAreaView style={{backgroundColor: COLORS.white, flex: 1}}>
+    <SafeAreaView style={{backgroundColor: theme.background, flex: 1}}>
         <Loader visible={loading}/>
             <ScrollView 
             automaticallyAdjustKeyboardInsets={true}
@@ -198,10 +200,10 @@ export default function RegisterScreen({navigation}){
                 paddingTop: 30,
                 paddingHorizontal: 20
             }}>
-                <Text style={{color: COLORS.black, fontSize: 36, fontWeight: 'bold' }}>
+                <Text style={{color: theme.color, fontSize: 36, fontWeight: 'bold' }}>
                     {i18n.t('register')}
                 </Text>
-                <Text style={{color: COLORS.grey, fontSize: 16, marginVertical: 10 }}>
+                <Text style={{color: theme.color, fontSize: 16, marginVertical: 10 }}>
                     {i18n.t('registerText')}
                 </Text>
             <View style={{marginVertical: 15}}>
@@ -255,13 +257,13 @@ export default function RegisterScreen({navigation}){
                 <View style={{alignItems: 'center'}}>
                     <View style = {{flexDirection: 'row', alignItems:'center'}}>
                         <Text style={{
-                            color: COLORS.black, 
+                            color: theme.color, 
                             textAlign: 'center', 
                             fontSize: 16, 
                             fontWeight: 'bold'
                         }}>{i18n.t('isHaveAccount2')}</Text>
                         <TouchableOpacity onPress={()=> navigation.navigate('LoginScreen')} >
-                            <Text style={{      color: COLORS.blue, 
+                            <Text style={{      color: theme.yearBorder, 
                             fontSize: 16, 
                             fontWeight: 'bold', 
                             marginLeft: 5}}>{i18n.t('enter')}</Text>

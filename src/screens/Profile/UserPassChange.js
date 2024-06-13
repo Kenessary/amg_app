@@ -1,16 +1,39 @@
 import { Dimensions, Text, View, TouchableOpacity, Keyboard, Alert } from 'react-native'
-import React, { Component, useState } from 'react'
+import React, { Component, useContext, useEffect, useState } from 'react'
 import Input from "../../components/Input"
 import { WaveIndicator } from 'react-native-indicators';
 import axios from "axios";
 import qs from "qs"
+import themeContext from '../../cores/themeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { theme } from '../../cores/theme';
+
 
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function UserPassChange({navigation}) {
+  
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  });
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+  
     const [inputs, setInputs] = useState({ iin: ''})
     const [errors, setErrors] = React.useState({})
     const [isLoading, setIsLoading] = useState(false)
@@ -121,7 +144,7 @@ export default function UserPassChange({navigation}) {
   }
   
     return (
-      <View style={{alignItems:'center', height: '100%', backgroundColor:'white'}}>
+      <View style={{alignItems:'center', height: '100%', backgroundColor: theme.background}}>
         <View style={{marginVertical: 15, width:windowWidth-40}}>
         <Input
                     keyboardType="numeric" 

@@ -10,8 +10,29 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+import themeContext from '../../cores/themeContext';
+
 
 export default function PinlockScreen({navigation}){
+
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  });
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
 
 
   let [locale, setLocale] = useState('');
@@ -244,26 +265,31 @@ const handleClearPassCode = () => {
   setPasscode(['','','','']);
 }
 
+
+
 return (
-  <SafeAreaView style={styles.container}>
-    <StatusBar style='dark' />
+  <SafeAreaView style={[styles.container, {backgroundColor: theme.background}]}>
+    {/* <StatusBar style='dark' /> */}
+    <StatusBar style= {isDarkMode ? 'light' : 'dark' } />
   <View>
   <View style={styles.swipe}>
     <View style={{marginTop: 80}}>
-      <Image 
-        source={require('../../../assets/bxs_lock-open-alt.png')}
+    {isDarkMode === true ?   <Image 
+        source={require('../../../assets/bxs_lock-open-alt-dark.png')}
         style={{width: 50, height: 50}}
-      />
+      /> :   <Image 
+      source={require('../../../assets/bxs_lock-open-alt.png')}
+      style={{width: 50, height: 50}}
+    />}
     </View>
     <View style={{marginTop: 30}}>
       <View>
-      <Text style={styles.passCodeText}>{i18n.t('pinlock')}</Text>
+      <Text style={[styles.passCodeText, {color: theme.color}]}>{i18n.t('pinlock')}</Text>
       </View>
       <View style={styles.codeContainer}>
-        {
+      {
           passcode.map(p=>{
-            let style = p != '' ? styles.code2: styles.code1
-            return <View style={style} key={p+Math.random()}></View>
+            return <View style={p != '' ? [styles.code2, {backgroundColor: isDarkMode === true ? "#C0D5EE":"#D64D43"}]: [styles.code1, {backgroundColor: isDarkMode === true ? "grey":"rgba(0,0,0,0.12)"}]} key={p+Math.random()}></View>
           })
         }
       </View>
@@ -274,62 +300,62 @@ return (
     <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[0].num)}
       >
-        <Text style={styles.numberText}>{numbers[0].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[0].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[1].num)}
       >
-        <Text style={styles.numberText}>{numbers[1].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[1].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[2].num)}
       >
-        <Text style={styles.numberText}>{numbers[2].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[2].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[3].num)}
       >
-        <Text style={styles.numberText}>{numbers[3].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[3].num}</Text>
       </TouchableOpacity>
 
       
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[4].num)}
       >
-        <Text style={styles.numberText}>{numbers[4].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[4].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[5].num)}
       >
-        <Text style={styles.numberText}>{numbers[5].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[5].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[6].num)}
       >
-        <Text style={styles.numberText}>{numbers[6].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[6].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[7].num)}
       >
-        <Text style={styles.numberText}>{numbers[7].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[7].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[8].num)}
       >
-        <Text style={styles.numberText}>{numbers[8].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[8].num}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.number} key={Math.random()} onPress={()=>onAuthenticate()}
       >
         <Text style={styles.numberText}>
-          {isFace[0] === 2 ?  <MaterialCommunityIcons name="face-recognition" size={32} color="black" /> :<Ionicons name="finger-print" size={32} color="black" />   }
+          {isFace[0] === 2 ?  <MaterialCommunityIcons name="face-recognition" size={32} color={theme.color} /> :<Ionicons name="finger-print" size={32} color={theme.color} />   }
           {/* <Ionicons name="finger-print" size={32} color="#black" /> */}
           {/* <Image source={require('../../../assets/iconoir_face-id.png')} style={{width: 40, height: 40}}/> */}
         </Text>
@@ -338,12 +364,12 @@ return (
       <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[10].num)}
       >
-        <Text style={styles.numberText}>{numbers[10].num}</Text>
+        <Text style={[styles.numberText, {color: theme.color}]}>{numbers[10].num}</Text>
       </TouchableOpacity>
 
 
       <TouchableOpacity style={styles.number} key={Math.random()} onPress={()=>onPressBack() }>
-      <Text style={styles.numberText}> <Feather name="delete" size={32} color="black" /> </Text>
+      <Text style={[styles.numberText, {color: theme.color}]}> <Feather name="delete" size={32} color={theme.color} /> </Text>
     </TouchableOpacity>
   </View>
 </View>
@@ -359,7 +385,7 @@ return (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
   }, 
 
   swipe: {

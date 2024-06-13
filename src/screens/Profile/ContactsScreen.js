@@ -1,26 +1,52 @@
-import { Text, View, StyleSheet, Dimensions, SafeAreaView, ScrollView, TouchableOpacity, Linking } from 'react-native'
-import React, { Component } from 'react'
+import { Text, View, StyleSheet, Dimensions, SafeAreaView, ScrollView, TouchableOpacity, Linking, Image } from 'react-native'
+import React, { Component, useContext, useEffect, useState } from 'react'
 import { Entypo, MaterialIcons } from '@expo/vector-icons'
+import themeContext from '../../cores/themeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function ContactsScreen() {
+
+    const theme = useContext(themeContext)
+
+    const [isDarkMode, setIsDarkMode] = useState(false)
+  
+    useEffect(() => {
+      // Load the user's preference from AsyncStorage
+      loadDarkModePreference();
+    }, []);
+  
+    const loadDarkModePreference = async () => {
+      try {
+        const preference = await AsyncStorage.getItem('darkMode');
+        if (preference !== null) {
+          setIsDarkMode(JSON.parse(preference));
+        }
+      } catch (error) {
+        console.log('Error loading dark mode preference:', error);
+      }
+    };
+
+
     return (
-      <View style={{flex:1, backgroundColor:'white'}}>
-        <ScrollView>
+      <View style={{flex:1, backgroundColor:theme.background}}>
+        <ScrollView showsVerticalScrollIndicator={false}>
         <View style={{alignItems:'center'}}>
             <View style={{width:windowWidth-20, padding:15, marginTop:10, paddingLeft:5}}>
-                <Text style={{fontSize:18, fontWeight:'600', color:'#4D4D4D'}}>Головной офис</Text>
+                <Text style={{fontSize:18, fontWeight:'600', color:theme.color}}>Головной офис</Text>
             </View>
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4'}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>АО "СНПС-Актобемунайгаз"</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>АО "СНПС-Актобемунайгаз"</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
                 <View style={{marginTop:15}}>
 
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Канцелярия: 
                     </Text>
                     <TouchableOpacity onPress={()=> Linking.openURL(`tel:${87132966941}`)} style={{flexDirection:'row', alignItems:'center', marginLeft:7, backgroundColor:'#A3F596', padding:3, borderRadius:5}}>
@@ -40,7 +66,7 @@ export default function ContactsScreen() {
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                     Факс: 
                     </Text>
 
@@ -60,7 +86,7 @@ export default function ContactsScreen() {
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -78,22 +104,29 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, пр-т 312 стрелковой дивизии, 3</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, пр-т 312 стрелковой дивизии, 3</Text>
                 </View>
 
             </View>
+{/* 
+            <View style={{width:windowWidth-20, borderWidth:1, backgroundColor:'green', paddingTop:10, paddingBottom:10, borderBottomLeftRadius:15, borderBottomRightRadius:15, borderTopWidth:0, borderColor:'#E4E4E4'}}>
+                <TouchableOpacity style={{width:"100%", alignItems:'center', justifyContent:'center', flexDirection:'row'}}>
+                    <Image source={require('../../../assets/orig.webp')} style={{height:18, width:18, borderRadius:5}}/>
+                    <Text style={{color:'white', fontWeight:'700', fontSize:16, marginLeft:8}}>Посмотреть 2ГИС</Text>
+                </TouchableOpacity>
+            </View> */}
         </View>
         <View style={{alignItems:'center'}}>
             <View style={{width:windowWidth-20, padding:15, marginTop:5, paddingLeft:5}}>
-                <Text style={{fontSize:18, fontWeight:'600', color:'#4D4D4D'}}>Подразделения</Text>
+                <Text style={{fontSize:18, fontWeight:'600', color:theme.color}}>Подразделения</Text>
             </View>
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4'}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Октябрьское нефтегазодобывающее управление</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Октябрьское нефтегазодобывающее управление</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -111,18 +144,18 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, ул. Некрасова, 158</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, ул. Некрасова, 158</Text>
                 </View>
 
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Кенкиякское нефтегазодобывающее управление</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Кенкиякское нефтегазодобывающее управление</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -140,18 +173,18 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>Темирский район, пос. Кенкияк, почтовое отделение "Нефтяник"</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>Темирский район, пос. Кенкияк, почтовое отделение "Нефтяник"</Text>
                 </View>
 
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Жанажольский нефтегазоперерабатывающий комплекс</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Жанажольский нефтегазоперерабатывающий комплекс</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -169,18 +202,18 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, ул. Некрасова, 158</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, ул. Некрасова, 158</Text>
                 </View>
 
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Управление производственно-технического обслуживания и комплектации оборудованием</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Управление производственно-технического обслуживания и комплектации оборудованием</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -198,18 +231,18 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, пр-т 312 стрелковой дивизии, 3</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, пр-т 312 стрелковой дивизии, 3</Text>
                 </View>
 
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Управление сбыта нефти и нефтепродуктов</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Управление сбыта нефти и нефтепродуктов</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -221,18 +254,18 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, пр-т 312 стрелковой дивизии, 3</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, пр-т 312 стрелковой дивизии, 3</Text>
                 </View>
 
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Актобемунайсервис</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Актобемунайсервис</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -251,17 +284,17 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, ул.Кобозева, 128</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, ул.Кобозева, 128</Text>
                 </View>
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Управление "Актобеэнергонефть"</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Управление "Актобеэнергонефть"</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -280,17 +313,17 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, ул.Кобозева, 128</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, ул.Кобозева, 128</Text>
                 </View>
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Управление общественного питания и торговли</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Управление общественного питания и торговли</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
 
@@ -309,17 +342,17 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, пер. Веселый, 12</Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, пер. Веселый, 12</Text>
                 </View>
             </View>
 
             <View style={{width:windowWidth-20, borderWidth:1, paddingLeft:15, paddingRight:15, paddingTop:10, paddingBottom:10, borderRadius:15, borderColor:'#E4E4E4', marginTop:10}}>
-                <Text style={{fontSize:16, fontWeight:'600', color:'#4D4D4D'}}>Строительное управление</Text>
+                <Text style={{fontSize:16, fontWeight:'600', color:theme.color}}>Строительное управление</Text>
                 {/* <View style={{width:'100%', height:1, backgroundColor:'black', marginTop:5}}/> */}
 
                 <View style={{marginTop:15}}>
                     <View style={{flexDirection:'row'}}>
-                    <Text style={{fontSize:16, color:'#4D4D4D'}}>
+                    <Text style={{fontSize:16, color:theme.color}}>
                         Приемная:
                     </Text>
                     <TouchableOpacity onPress={()=> Linking.openURL(`tel:${87132766405}`)} style={{flexDirection:'row', alignItems:'center', marginLeft:7, backgroundColor:'#A3F596', padding:3, borderRadius:5}}>
@@ -337,7 +370,7 @@ export default function ContactsScreen() {
                     </View>
                 </View>
                 <View style={{marginTop:10}}>
-                    <Text style={{fontSize:15, fontWeight: '500', color:'#4D4D4D'}}>г. Актобе, ул. Пожарского, 69 </Text>
+                    <Text style={{fontSize:15, fontWeight: '500', color:theme.color}}>г. Актобе, ул. Пожарского, 69 </Text>
                 </View>
             </View>
             <View style={{marginTop:20}}/>

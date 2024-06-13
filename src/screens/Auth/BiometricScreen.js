@@ -1,70 +1,124 @@
-import React, {useState, useEffect, useContext} from 'react';
-import { Text, View, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, Image, Modal, Dimensions, Alert, Pressable,Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; 
-import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Code from '../../components/Code';
-import { StatusBar } from 'expo-status-bar';
-import { AuthContext } from '../../context/AuthContext';
-import i18n from 'i18n-js'
-import { kz, ru, ch } from '../../languages/localizations';
+import React, { useState, useEffect, useContext } from "react";
+import {
+  Text,
+  View,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  Image,
+  Modal,
+  Dimensions,
+  Alert,
+  Pressable,
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Code from "../../components/Code";
+import { StatusBar } from "expo-status-bar";
+import { AuthContext } from "../../context/AuthContext";
+import i18n from "i18n-js";
+import { kz, ru, ch } from "../../languages/localizations";
+import themeContext from "../../cores/themeContext";
+import VerifyForPassword from "../Profile/VerifyForPassword";
+import LoginVerify from "../Profile/LoginVerify";
 
 // import * as LocalAuthentication from 'expo-local-authentication'
 
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
-export default function BiometricScreen({navigation}){
-  const [passcode, setPasscode] = useState(['','','',''])
-  const [passcode1, setPasscode1] = useState(['','','',''])
-  const [firstPassword, setFirstPassword] = useState('')
-  const [firstPassword1, setFirstPassword1] = useState('')
-  const [seconPass, setSecondPass] = useState('')
+export default function BiometricScreen({ navigation, vd }) {
+  const theme = useContext(themeContext);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  });
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem("darkMode");
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log("Error loading dark mode preference:", error);
+    }
+  };
+  const [passcode, setPasscode] = useState(["", "", "", ""]);
+  const [passcode1, setPasscode1] = useState(["", "", "", ""]);
+  const [firstPassword, setFirstPassword] = useState("");
+  const [firstPassword1, setFirstPassword1] = useState("");
+  const [seconPass, setSecondPass] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisibleBio, setModalVisibleBio] = useState(false);
   const [modalVisible1, setModalVisible1] = useState(false);
-  const [ isAuthenticated, setIsAutenticated ] = useState(false)
-  const [ isBiometricSupported, setIsBiometricSupported ] = useState(false) 
-  const { login, iin } = useContext(AuthContext)
+  const [isAuthenticated, setIsAutenticated] = useState(false);
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+  const { iin, showBiometric, userVerified, foreignUser } =
+    useContext(AuthContext);
 
-  let [locale, setLocale] = useState('');
-  let [lang, setLang] = useState('')
+  const [biometicpage, setBiometricPage] = useState(false);
 
-  i18n.fallbacks = true
+  //   const getBiometric = () => {
+  //     try {
+  //         AsyncStorage.getItem('showbiometricpage')
+  //             .then(value => {
+  //                 if(value != null){
+  //                     setBiometricPage(value)
+  //                 }
+  //             })
+  //     } catch(error){
+  //         console.log(error)
+  //     }
+  // }
+
+  // useEffect(()=>{
+  //   if(iin !== ''){
+  //       getBiometric()
+  //   }
+  // })
+
+  // console.log(userVerified, foreignUser === '0')
+
+  let [locale, setLocale] = useState("");
+  let [lang, setLang] = useState("");
+
+  i18n.fallbacks = true;
   i18n.translations = { kz, ru, ch };
   i18n.locale = lang;
-  i18n.defaultLocale = 'kz'
+  i18n.defaultLocale = "kz";
 
-  useEffect(()=>{
-      if(locale !== ''){
-        AsyncStorage.setItem('appLanguage', locale)
-      }
-    })
-  
-    useEffect(()=>{
-      getData1()
-  })
-  
-  const getData1 = () => { 
-      try {
-          AsyncStorage.getItem('appLanguage')
-              .then(value => {
-                  if(value != null){
-                  //   console.log(value)
-                      setLang(value)
-                  }
-              })
-          // setIsLoading(false)
-      } catch(error){
-          // setIsLoading(false)
-          console.log(error)
-      }
-  }
+  useEffect(() => {
+    if (locale !== "") {
+      AsyncStorage.setItem("appLanguage", locale);
+    }
+  });
 
-  
+  useEffect(() => {
+    getData1();
+  });
+
+  const getData1 = () => {
+    try {
+      AsyncStorage.getItem("appLanguage").then((value) => {
+        if (value != null) {
+          //   console.log(value)
+          setLang(value);
+        }
+      });
+      // setIsLoading(false)
+    } catch (error) {
+      // setIsLoading(false)
+      console.log(error);
+    }
+  };
 
   // console.log(seconPass)
-
-
 
   // useEffect(()=>{
   //   (async () => {
@@ -74,10 +128,8 @@ export default function BiometricScreen({navigation}){
   //   })()
   // })
 
- 
-
   // function onAuthenticate() {
-    
+
   //   const auth = LocalAuthentication.authenticateAsync({
   //     promptMessage: 'Authenticate with Touch ID',
   //     disableDeviceFallback: true,
@@ -88,282 +140,370 @@ export default function BiometricScreen({navigation}){
   //     console.log(result)
   //   })
   // }
-  
-
-useEffect(()=>{getData()}, [passcode])
-useEffect(()=>{getData11()}, [passcode])
-useEffect(()=>{getData111()}, [passcode1])
 
   useEffect(() => {
-    if(!passcode.includes('')) {
+    getData();
+  }, [passcode]);
+  useEffect(() => {
+    getData11();
+  }, [passcode]);
+  useEffect(() => {
+    getData111();
+  }, [passcode1]);
+
+  useEffect(() => {
+    if (!passcode.includes("")) {
       // handleSubmitPassCode();
-      setTimeout(()=>{
-        AsyncStorage.setItem('firstPassword',JSON.stringify(passcode))
+      setTimeout(() => {
+        AsyncStorage.setItem("firstPassword", JSON.stringify(passcode));
         handleSubmitPassCode();
-      },50)
+      }, 50);
     }
   }, [passcode]);
 
-  const getData = () => { 
+  const getData = () => {
     try {
-        AsyncStorage.getItem('firstPassword')
-            .then(value => {
-                if(value != null){
-                    setFirstPassword(value)
-                }
-            })
-    } catch(error){
-        console.log(error)
+      AsyncStorage.getItem("firstPassword").then((value) => {
+        if (value != null) {
+          setFirstPassword(value);
+        }
+      });
+    } catch (error) {
+      console.log(error);
     }
-}
+  };
 
-const getData11 = () => { 
-  try {
-      AsyncStorage.getItem('firstPassword')
-          .then(value => {
-              if(value != null){
-                  setFirstPassword1(value)
-              }
-          })
-  } catch(error){
-      console.log(error)
-  }
-}
+  const getData11 = () => {
+    try {
+      AsyncStorage.getItem("firstPassword").then((value) => {
+        if (value != null) {
+          setFirstPassword1(value);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-const getData111 = () => { 
-  try {
-      AsyncStorage.getItem('secondPass')
-          .then(value => {
-              if(value != null){
-                  setSecondPass(value)
-              }
-          })
-  } catch(error){
-      console.log(error)
-  }
-}
+  const getData111 = () => {
+    try {
+      AsyncStorage.getItem("secondPass").then((value) => {
+        if (value != null) {
+          setSecondPass(value);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-const createTwoButtonAlert1 = () =>
-Alert.alert(
-  i18n.t('bioAlert'),
-  i18n.t('bioAlert2'),
-  [
-    { 
+  const createTwoButtonAlert1 = () =>
+    Alert.alert(i18n.t("bioAlert"), i18n.t("bioAlert2"), [
+      {
         text: "OK",
         // onPress: () => console.log("Хорошо Pressed")
-    }
-  ]
-);
-
+      },
+    ]);
 
   useEffect(() => {
-    if(!passcode1.includes('')) {
+    if (!passcode1.includes("")) {
       // handleSubmitPassCode();
-      setTimeout(()=>{
-        if (JSON.stringify(passcode1) === firstPassword1){
+      setTimeout(() => {
+        if (JSON.stringify(passcode1) === firstPassword1) {
           // handleClearPassCode1();
-          AsyncStorage.setItem('secondPass',JSON.stringify(passcode1))
-          
+          AsyncStorage.setItem("secondPass", JSON.stringify(passcode1));
+
           handleSubmitPassCode1();
-          setModalVisible(false)
-        }else {
-          createTwoButtonAlert1()
+          setModalVisible(false);
+        } else {
+          createTwoButtonAlert1();
           handleClearPassCode1();
         }
-        
+
         // handleSubmitPassCode();
-      },50)
+      }, 50);
     }
   }, [passcode1]);
 
-
-
   const onPressNumber = (num) => {
     let tempPassCode = [...passcode];
-    for(let i=0; i < tempPassCode.length; i++){
-      if(tempPassCode[i] == '' ){
-        tempPassCode[i]=num;
+    for (let i = 0; i < tempPassCode.length; i++) {
+      if (tempPassCode[i] == "") {
+        tempPassCode[i] = num;
         // console.log(typeof(num))
         break;
-      }else{
-        continue;
-      }
-    }
-    setPasscode(tempPassCode)
-  }
-
-  const onPressBack =(num)=>{
-    let tempPassCode = [...passcode];
-    for(let i=tempPassCode.length-1;i>=0;i--){
-      if(tempPassCode[i]!=''){
-        tempPassCode[i]='';
-        break;
-      }else{
+      } else {
         continue;
       }
     }
     setPasscode(tempPassCode);
-}
+  };
 
-  const onPressNumber1 = (num) => {
-    let tempPassCode = [...passcode1];
-    for(let i=0; i < tempPassCode.length; i++){
-      if(tempPassCode[i] == '' ){
-        tempPassCode[i]=num;
-        // console.log(typeof(num))
+  const onPressBack = (num) => {
+    let tempPassCode = [...passcode];
+    for (let i = tempPassCode.length - 1; i >= 0; i--) {
+      if (tempPassCode[i] != "") {
+        tempPassCode[i] = "";
         break;
-      }else{
+      } else {
         continue;
       }
     }
-    setPasscode1(tempPassCode)
-  }
+    setPasscode(tempPassCode);
+  };
 
-  const onPressBack1 =(num)=>{
+  const onPressNumber1 = (num) => {
     let tempPassCode = [...passcode1];
-    for(let i=tempPassCode.length-1;i>=0;i--){
-      if(tempPassCode[i]!=''){
-        tempPassCode[i]='';
+    for (let i = 0; i < tempPassCode.length; i++) {
+      if (tempPassCode[i] == "") {
+        tempPassCode[i] = num;
+        // console.log(typeof(num))
         break;
-      }else{
+      } else {
         continue;
       }
     }
     setPasscode1(tempPassCode);
-}
+  };
 
+  const onPressBack1 = (num) => {
+    let tempPassCode = [...passcode1];
+    for (let i = tempPassCode.length - 1; i >= 0; i--) {
+      if (tempPassCode[i] != "") {
+        tempPassCode[i] = "";
+        break;
+      } else {
+        continue;
+      }
+    }
+    setPasscode1(tempPassCode);
+  };
 
-let numbers = [
-  {num: 1},{num: 2},{num: 3},{num: 4},{num: 5},
-  {num: 6},{num: 7},{num: 8},{num: 9},
-  {id: 100, num: ' '},
-  {id: 110, num: `0` }
-]
+  let numbers = [
+    { num: 1 },
+    { num: 2 },
+    { num: 3 },
+    { num: 4 },
+    { num: 5 },
+    { num: 6 },
+    { num: 7 },
+    { num: 8 },
+    { num: 9 },
+    { id: 100, num: " " },
+    { id: 110, num: `0` },
+  ];
 
-const handleSubmitPassCode = () => {
-  handleClearPassCode();
-  // navigation.navigate('RepBiometricScreen')
-  setModalVisible(true)
-}
-const handleClearPassCode = () => {
-  setPasscode(['','','','']);
-}
+  const handleSubmitPassCode = () => {
+    handleClearPassCode();
+    // navigation.navigate('RepBiometricScreen')
+    setModalVisible(true);
+  };
+  const handleClearPassCode = () => {
+    setPasscode(["", "", "", ""]);
+  };
 
-
-const handleSubmitPassCode1 = () => {
-    setModalVisible(false)
-    setModalVisible1(true)
+  const handleSubmitPassCode1 = () => {
+    setModalVisible(false);
+    setModalVisible1(true);
     // navigation.navigate('HomeScreen')
-}
-const handleClearPassCode1 = () => {
-  setPasscode1(['','','','']);
-}
+  };
+  const handleClearPassCode1 = () => {
+    setPasscode1(["", "", "", ""]);
+  };
 
-return (
-  <SafeAreaView style={styles.container}>
-  <StatusBar style='dark' />
+  // const variable = userVerified === false || foreignUser === '0'
 
-  <View style={{ opacity : iin !== null && seconPass !== '' ? 0.1 : 1, marginTop: Platform.OS === 'ios' ? 40 : 40 }}>
-  <View style={styles.swipe}>
-    <View style={{marginTop: 50}}>
-      <Image 
-        source={require('../../../assets/bxs_lock-open-alt.png')}
-        style={{width: 50, height: 50}}
-      />
-    </View>
-    <View style={{marginTop: 30}}>
-      <View>
-      <Text style={styles.passCodeText}>{i18n.t('bioText')}</Text>
+  return (
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <StatusBar style={isDarkMode === true ? "dark" : "light"} />
+
+      <Modal
+        animationType="none"
+        transparent={false}
+        visible={iin !== "" ? showBiometric : !showBiometric}
+      >
+        <LoginVerify />
+      </Modal>
+
+      <View
+        style={{
+          opacity: iin !== null && seconPass !== "" ? 0.1 : 1,
+          marginTop: Platform.OS === "ios" ? 40 : 40,
+        }}
+      >
+        <View style={styles.swipe}>
+          <View style={{ marginTop: 50 }}>
+            {isDarkMode === true ? (
+              <Image
+                source={require("../../../assets/bxs_lock-open-alt-dark.png")}
+                style={{ width: 50, height: 50 }}
+              />
+            ) : (
+              <Image
+                source={require("../../../assets/bxs_lock-open-alt.png")}
+                style={{ width: 50, height: 50 }}
+              />
+            )}
+          </View>
+          <View style={{ marginTop: 30 }}>
+            <View>
+              <Text style={[styles.passCodeText, { color: theme.color }]}>
+                {i18n.t("bioText")}
+              </Text>
+            </View>
+            <View style={styles.codeContainer}>
+              {passcode.map((p) => {
+                return (
+                  <View
+                    style={
+                      p != ""
+                        ? [
+                            styles.code2,
+                            {
+                              backgroundColor:
+                                isDarkMode === true ? "#C0D5EE" : "#D64D43",
+                            },
+                          ]
+                        : [
+                            styles.code1,
+                            {
+                              backgroundColor:
+                                isDarkMode === true
+                                  ? "grey"
+                                  : "rgba(0,0,0,0.12)",
+                            },
+                          ]
+                    }
+                    key={p + Math.random()}
+                  ></View>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <View style={styles.numbersContainer}>
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[0].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[0].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[1].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[1].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[2].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[2].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[3].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[3].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[4].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[4].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[5].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[5].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[6].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[6].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[7].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[7].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[8].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[8].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.number} key={Math.random()}>
+              <Text style={[styles.numberText, { color: theme.color }]}></Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressNumber(numbers[10].num)}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {numbers[10].num}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.number}
+              key={Math.random()}
+              onPress={() => onPressBack()}
+            >
+              <Text style={[styles.numberText, { color: theme.color }]}>
+                {" "}
+                <Feather name="delete" size={32} color={theme.color} />{" "}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-      <View style={styles.codeContainer}>
-        {
-          passcode.map(p=>{
-            let style = p != '' ? styles.code2: styles.code1
-            return <View style={style} key={p+Math.random()}></View>
-          })
-        }
-      </View>
-    </View>
-  </View>
-  <View style={{alignItems: 'center', justifyContent:'center'}}>
-  <View style = {styles.numbersContainer}>
-    <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[0].num)}
-      >
-        <Text style={styles.numberText}>{numbers[0].num}</Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[1].num)}
-      >
-        <Text style={styles.numberText}>{numbers[1].num}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[2].num)}
-      >
-        <Text style={styles.numberText}>{numbers[2].num}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[3].num)}
-      >
-        <Text style={styles.numberText}>{numbers[3].num}</Text>
-      </TouchableOpacity>
-
-      
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[4].num)}
-      >
-        <Text style={styles.numberText}>{numbers[4].num}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[5].num)}
-      >
-        <Text style={styles.numberText}>{numbers[5].num}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[6].num)}
-      >
-        <Text style={styles.numberText}>{numbers[6].num}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[7].num)}
-      >
-        <Text style={styles.numberText}>{numbers[7].num}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[8].num)}
-      >
-        <Text style={styles.numberText}>{numbers[8].num}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      >
-        <Text style={styles.numberText}></Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber(numbers[10].num)}
-      >
-        <Text style={styles.numberText}>{numbers[10].num}</Text>
-      </TouchableOpacity>
-
-
-      <TouchableOpacity style={styles.number} key={Math.random()} onPress={()=>onPressBack() }>
-      <Text style={styles.numberText}> <Feather name="delete" size={32} color="black" /> </Text>
-    </TouchableOpacity>
-  </View>
-</View>
-</View>
-
-
-
-  <Modal
+      <Modal
         animationType="none"
         transparent={false}
         visible={modalVisible}
@@ -371,50 +511,87 @@ return (
         //   setModalVisible(!modalVisible);
         // }}
       >
-        <View style={{width:windowWidth, height:windowHeight, backgroundColor:'white'}}>
-
+        <View
+          style={{
+            width: windowWidth,
+            height: windowHeight,
+            backgroundColor: theme.background,
+          }}
+        >
           <View>
-            <View style={{marginLeft: 30, marginTop:40}}>
+            <View style={{ marginLeft: 30, marginTop: 40 }}>
               {/* <Text>
                 X
               </Text> */}
               <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
-              <Ionicons name="ios-chevron-back" size={23} color="#D64D43" />
+                <Ionicons
+                  name="chevron-back"
+                  size={23}
+                  color={isDarkMode === true ? "white" : "#D64D43"}
+                />
               </TouchableOpacity>
             </View>
-  <View style={styles.swipe}>
-   
-    <View style={{marginTop: -25}}>
-    {/* <Pressable
+            <View style={styles.swipe}>
+              <View style={{ marginTop: -25 }}>
+                {/* <Pressable
               // style={[styles.button, styles.buttonClose]}
               onPress={() => setModalVisible(!modalVisible)}
             >
               <Text>Hide Modal</Text>
             </Pressable> */}
-           
-            
-      <Image 
-        source={require('../../../assets/bxs_lock-open-alt.png')}
-        style={{width: 50, height: 50}}
-      />
-    </View>
-    <View style={{marginTop: 30}}>
-      <View>
-      <Text style={styles.passCodeText}> {i18n.t('bioTextRep')} </Text>
-      </View>
-      <View style={styles.codeContainer}>
-        {
-          passcode1.map(p=>{
-            let style = p != '' ? styles.code2: styles.code1
-            return <View style={style} key={p+Math.random()}></View>
-          })
-        }
-      </View>
-    </View>
-  </View>
-  <View style={{alignItems: 'center', justifyContent:'center'}}>
-  <View style = {styles.numbersContainer1}>
-    {/* {numbers.map(num=>{
+
+                {isDarkMode === true ? (
+                  <Image
+                    source={require("../../../assets/bxs_lock-open-alt-dark.png")}
+                    style={{ width: 50, height: 50 }}
+                  />
+                ) : (
+                  <Image
+                    source={require("../../../assets/bxs_lock-open-alt.png")}
+                    style={{ width: 50, height: 50 }}
+                  />
+                )}
+              </View>
+              <View style={{ marginTop: 30 }}>
+                <View>
+                  <Text style={[styles.passCodeText, { color: theme.color }]}>
+                    {" "}
+                    {i18n.t("bioTextRep")}{" "}
+                  </Text>
+                </View>
+                <View style={styles.codeContainer}>
+                  {passcode1.map((p) => {
+                    return (
+                      <View
+                        style={
+                          p != ""
+                            ? [
+                                styles.code2,
+                                {
+                                  backgroundColor:
+                                    isDarkMode === true ? "#C0D5EE" : "#D64D43",
+                                },
+                              ]
+                            : [
+                                styles.code1,
+                                {
+                                  backgroundColor:
+                                    isDarkMode === true
+                                      ? "grey"
+                                      : "rgba(0,0,0,0.12)",
+                                },
+                              ]
+                        }
+                        key={p + Math.random()}
+                      ></View>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+            <View style={{ alignItems: "center", justifyContent: "center" }}>
+              <View style={styles.numbersContainer1}>
+                {/* {numbers.map(num=>{
       return ( 
       <TouchableOpacity style={styles.number} key={num.id} 
       onPress = {()=> onPressNumber(num.num)}
@@ -423,101 +600,140 @@ return (
       </TouchableOpacity>)
     })} */}
 
-    <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[0].num)}
-      >
-        <Text style={styles.numberText}>{numbers[0].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[0].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[0].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[1].num)}
-      >
-        <Text style={styles.numberText}>{numbers[1].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[1].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[1].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[2].num)}
-      >
-        <Text style={styles.numberText}>{numbers[2].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[2].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[2].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[3].num)}
-      >
-        <Text style={styles.numberText}>{numbers[3].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[3].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[3].num}
+                  </Text>
+                </TouchableOpacity>
 
-      
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[4].num)}
-      >
-        <Text style={styles.numberText}>{numbers[4].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[4].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[4].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[5].num)}
-      >
-        <Text style={styles.numberText}>{numbers[5].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[5].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[5].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[6].num)}
-      >
-        <Text style={styles.numberText}>{numbers[6].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[6].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[6].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[7].num)}
-      >
-        <Text style={styles.numberText}>{numbers[7].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[7].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[7].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[8].num)}
-      >
-        <Text style={styles.numberText}>{numbers[8].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[8].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[8].num}
+                  </Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      >
-        <Text style={styles.numberText}></Text>
-      </TouchableOpacity>
+                <TouchableOpacity style={styles.number} key={Math.random()}>
+                  <Text style={styles.numberText}></Text>
+                </TouchableOpacity>
 
-      <TouchableOpacity style={styles.number} key={Math.random()} 
-      onPress = {()=> onPressNumber1(numbers[10].num)}
-      >
-        <Text style={styles.numberText}>{numbers[10].num}</Text>
-      </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressNumber1(numbers[10].num)}
+                >
+                  <Text style={[styles.numberText, { color: theme.color }]}>
+                    {numbers[10].num}
+                  </Text>
+                </TouchableOpacity>
 
-      {/* <TouchableOpacity style={styles.number} key={Math.random()} 
+                {/* <TouchableOpacity style={styles.number} key={Math.random()} 
       onPress = {()=> onPressNumber(numbers[10].num)}
       >
         <Text style={styles.numberText}>{numbers[10].num}</Text>
       </TouchableOpacity> */}
 
-      <TouchableOpacity style={styles.number} key={Math.random()} onPress={()=>onPressBack1() }>
-      <Text style={styles.numberText}> <Feather name="delete" size={32} color="black" /> </Text>
-    </TouchableOpacity>
-  </View>
-</View>
-</View>
-          
+                <TouchableOpacity
+                  style={styles.number}
+                  key={Math.random()}
+                  onPress={() => onPressBack1()}
+                >
+                  <Text style={styles.numberText}>
+                    {" "}
+                    <Feather name="delete" size={32} color={theme.color} />{" "}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
 
-
-            {/* <Pressable
+          {/* <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => setModalVisible(!modalVisible)}
             >
               <Text style={styles.textStyle}>Hide Modal</Text>
             </Pressable> */}
-          
         </View>
+      </Modal>
 
-  </Modal>
-
-
-  
-  <Modal
+      <Modal
         animationType="none"
         transparent={false}
         visible={modalVisible1}
@@ -525,157 +741,169 @@ return (
         //   setModalVisible(!modalVisible);
         // }}
       >
-        <View style={{marginTop: 30, alignItems:'center'}}><Text style={{fontSize:18, fontWeight:'bold', color:'#4D4D4D'}}>Touch ID / Face ID</Text></View>
-        <View style={{flex: 1, justifyContent:'center', alignItems:'center'}}>
-        {/* <Image 
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: theme.background,
+          }}
+        >
+          <View style={{ alignItems: "center" }}>
+            <Text
+              style={{ fontSize: 18, fontWeight: "bold", color: theme.color }}
+            >
+              Touch ID / Face ID
+            </Text>
+          </View>
+          {/* <Image 
         source={require('../../../assets/iconoir_face-id.png')}
         style={{width: 70, height: 70}}
       /> */}
-          
-        <Ionicons name="ios-finger-print-outline" size={70} color="#D64D43" />
-        <View style={{width:windowWidth-60, marginTop: 30, justifyContent:'center'}}>
-        <Text style={{fontSize: 19, textAlign:'center', lineHeight: 30, color:'#4D4D4D'}}>
-          {i18n.t('bioTextTouch')}
-        </Text>
-        <View style={{justifyContent:'center', marginTop:50}}>
-          <TouchableOpacity style={{backgroundColor:'#D64D43', width: '100%', height:50, alignItems:'center', justifyContent:'center', marginRight: 10, borderRadius: 3}} onPress={() =>{setModalVisible1(!modalVisible1),navigation.navigate('HomeScreen')}} >
-            <Text style={{color:'white', fontSize: 18}}>{i18n.t('bioTextTouchId')}</Text>
-          </TouchableOpacity>          
-        </View>
-        </View>
-        </View>
 
+          <Ionicons
+            name="finger-print-outline"
+            size={70}
+            color={isDarkMode === true ? "#C0D5EE" : "#D64D43"}
+            style={{ marginTop: 50 }}
+          />
+          <View
+            style={{
+              width: windowWidth - 60,
+              marginTop: 30,
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 19,
+                textAlign: "center",
+                lineHeight: 30,
+                color: theme.color,
+              }}
+            >
+              {i18n.t("bioTextTouch")}
+            </Text>
+            <View style={{ justifyContent: "center", marginTop: 50 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: isDarkMode === true ? "#C0D5EE" : "#D64D43",
+                  width: "100%",
+                  height: 50,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 10,
+                  borderRadius: 10,
+                }}
+                onPress={() => {
+                  setModalVisible1(!modalVisible1),
+                    navigation.navigate("HomeScreen");
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.background,
+                    fontSize: 18,
+                    fontWeight: "500",
+                  }}
+                >
+                  {i18n.t("bioTextTouchId")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
-
-</SafeAreaView>
-)
+    </SafeAreaView>
+  );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-  }, 
+  },
 
   swipe: {
     height: 173,
-    alignItems:'center',
-    justifyContent: 'center'
-  }, 
+    alignItems: "center",
+    justifyContent: "center",
+  },
   passCodeText: {
     fontSize: 18,
     letterSpacing: 0.34,
-    lineHeight: 25, 
-    textAlign:'center'
+    lineHeight: 25,
+    textAlign: "center",
   },
   codeContainer: {
     marginTop: 15,
-    flexDirection: 'row',
-    alignItems:'center',
-    justifyContent: 'space-around'
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
   },
   code1: {
     width: 13,
     height: 13,
     borderRadius: 13,
-    backgroundColor: 'rgba(0,0,0,0.12)'
   },
   code2: {
     width: 13,
     height: 13,
     borderRadius: 13,
-    backgroundColor: '#D64D43'
   },
-  number:{
+  number: {
     width: 75,
     height: 75,
     borderRadius: 75,
     margin: 9,
     // backgroundColor: 'rgba(204,32,20,0.1)',
-    justifyContent:'center',
-    alignItems:'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  numbersContainer:{
-    flexDirection: 'row',
-    flexWrap:'wrap',
+  numbersContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginTop: 35,
     width: 282,
     height: 348,
-    alignItems: 'center',
-    justifyContent: 'center',
-
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  numbersContainer1:{
-    flexDirection: 'row',
-    flexWrap:'wrap',
+  numbersContainer1: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginTop: -17,
     width: 282,
     height: 348,
-    alignItems: 'center',
-    justifyContent: 'center',
-
+    alignItems: "center",
+    justifyContent: "center",
   },
   numberText: {
     fontSize: 32,
-    color: "black",
     letterSpacing: 0,
-    textAlign: 'center'
+    textAlign: "center",
   },
   buttons: {
     marginTop: 73,
-    marginLeft:46,
-    marginRight:46,
-    flexDirection: 'row',
-    alignItems:'center',
-    justifyContent: 'space-between'
+    marginLeft: 46,
+    marginRight: 46,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   buttonText: {
-    fontSize:16,
+    fontSize: 16,
     letterSpacing: -0.39,
-    textAlign: 'center'
-  }
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    textAlign: "center",
+  },
+});
 
 // import { Text, View, StyleSheet, Image, StatusBar, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native'
 // import React, { Component } from 'react'
-// import { Ionicons } from '@expo/vector-icons'; 
+// import { Ionicons } from '@expo/vector-icons';
 // import { Feather } from '@expo/vector-icons';
 // import * as LocalAuthentication from 'expo-local-authentication'
 // import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 // export class BiometricScreen extends Component {
 //   constructor(props){
@@ -685,13 +913,9 @@ const styles = StyleSheet.create({
 //     }
 //   }
 
-
 //    async authenticate() {
 //     const result = await LocalAuthentication.authenticateAsync(LocalAuthentication.AuthenticationType.FINGERPRINT)
 // }
-
-
-  
 
 //   _onPressNumber = num => {
 //     let tempCode = this.state.passcode
@@ -723,14 +947,13 @@ const styles = StyleSheet.create({
 //     console.log(a)
 //   }
 
-
 //   render() {
 //     let numbers = [
 //       {id: 10, num: 1},{id: 20, num: 2},{id: 30, num: 3},{id: 40, num: 4},{id: 50, num: 5},
 //       {id: 60, num: 6},{id: 70, num: 7},{id: 80, num: 8},{id: 90, num: 9},
 //        {id: 100, num: <TouchableOpacity onPress={()=>this.authenticate()} ><Ionicons name="finger-print" size={32} color="black" /></TouchableOpacity>  },
 //       {id: 110, num: 0},
-//       { id: 120, 
+//       { id: 120,
 //         num: <TouchableOpacity onPress={()=>this._onPressCancel()}>
 //         <Feather name="delete" size={32} color="black" />
 //         </TouchableOpacity> }
@@ -740,7 +963,7 @@ const styles = StyleSheet.create({
 //       <SafeAreaView style={styles.container}>
 //           <View style={styles.swipe}>
 //             <View style={{marginTop: 100}}>
-//               <Image 
+//               <Image
 //                 source={require('../../assets/bxs_lock-open-alt.png')}
 //                 style={{width: 50, height: 50}}
 //               />
@@ -762,8 +985,8 @@ const styles = StyleSheet.create({
 //           <View style={{alignItems: 'center', justifyContent:'center'}}>
 //           <View style = {styles.numbersContainer}>
 //             {numbers.map(num=>{
-//               return ( 
-//               <TouchableOpacity style={styles.number} key={num.id} 
+//               return (
+//               <TouchableOpacity style={styles.number} key={num.id}
 //               onPress = {()=> this._onPressNumber(num.num)}
 //               >
 //                 <Text style={styles.numberText}>{num.num}</Text>
@@ -779,8 +1002,7 @@ const styles = StyleSheet.create({
 //             <Text style={styles.buttonText}>Отмена</Text>
 //           </TouchableOpacity>
 //         </View> */}
-    
- 
+
 //       </SafeAreaView>
 //     )
 //   }
@@ -790,13 +1012,13 @@ const styles = StyleSheet.create({
 //   container: {
 //     flex: 1,
 //     backgroundColor: 'white',
-//   }, 
+//   },
 
 //   swipe: {
 //     height: 173,
 //     alignItems:'center',
 //     justifyContent: 'center'
-//   }, 
+//   },
 //   passCodeText: {
 //     fontSize: 22,
 //     letterSpacing: 0.34,
@@ -862,12 +1084,9 @@ const styles = StyleSheet.create({
 
 // export default BiometricScreen
 
-
 // import * as LocalAuthentication from 'expo-local-authentication';
 // import * as React from 'react';
 // import { Button, Text, View } from 'react-native';
-
-
 
 // const Colors = {   CANCELLED :'CANCELLED',
 // DISABLED : 'DISABLED',
@@ -882,7 +1101,6 @@ const styles = StyleSheet.create({
 //   const [loading, setLoading] = React.useState(false);
 //   const [result, setResult] = React.useState(Colors);
 
-  
 //   const checkSupportedAuthentication = async () => {
 //     const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
 //     if (types && types.length) {
@@ -891,7 +1109,6 @@ const styles = StyleSheet.create({
 //       setIrisAvailable(types.includes(LocalAuthentication.AuthenticationType.IRIS));
 //     }
 //   };
-
 
 //   const authenticate = async () => {
 //     if (loading) {
@@ -963,7 +1180,6 @@ const styles = StyleSheet.create({
 //     description = 'No biometric authentication methods available';
 //   }
 
-  
 //     return (
 //       <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
 //       <Text>

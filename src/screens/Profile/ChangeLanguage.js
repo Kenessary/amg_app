@@ -9,7 +9,9 @@ const windowHeight = Dimensions.get('window').height;
 import * as Updates from 'expo-updates';
 import { WaveIndicator } from 'react-native-indicators';
 import * as Application from 'expo-application'
+import themeContext from '../../cores/themeContext';
 // import { BackHandler } from 'react-native';
+
 
 
 
@@ -18,6 +20,28 @@ export default function ChangeLanguage ({navigation}) {
     let [locale, setLocale] = useState('');
     let [lang, setLang] = useState('')
     const [ isLoading, setIsLoading ] = useState(false)
+
+    
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  globalThis.dm = isDarkMode
+  
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+  
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+  
 
     i18n.fallbacks = true
     i18n.translations = { kz, ru, ch };
@@ -78,7 +102,7 @@ export default function ChangeLanguage ({navigation}) {
 
 
     return (
-      <View>
+      <View style={{}}>
                       <View style={{ alignItems:'center', backgroundColor:'white', height: "100%"}}>
         <View style={{width: windowWidth-20, height: 320, alignItems:'center'}}>
           <View style={{width:windowWidth-60, height:120, alignItems:'left', marginTop:10}}>

@@ -11,6 +11,11 @@ import BackButton from '../../components/BackButton';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
+import LottieView from "lottie-react-native"
+
+
+
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
@@ -18,9 +23,30 @@ import { StatusBar } from 'expo-status-bar';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import * as Clipboard from 'expo-clipboard';
+import themeContext from '../../cores/themeContext';
 
 
 function FoodMenuScreen({navigation, goBack}) {
+
+    const theme = useContext(themeContext)
+
+    const [isDarkMode, setIsDarkMode] = useState(false)
+  
+    useEffect(() => {
+      // Load the user's preference from AsyncStorage
+      loadDarkModePreference();
+    }, []);
+  
+    const loadDarkModePreference = async () => {
+      try {
+        const preference = await AsyncStorage.getItem('darkMode');
+        if (preference !== null) {
+          setIsDarkMode(JSON.parse(preference));
+        }
+      } catch (error) {
+        console.log('Error loading dark mode preference:', error);
+      }
+    };
 
     const {iin} = useContext(AuthContext)
     const [ menu, setMenu ] = useState('')
@@ -29,6 +55,7 @@ function FoodMenuScreen({navigation, goBack}) {
     const [isLoading, setIsLoading] = useState(false)
     const [shouldShow, setShouldShow] = useState(false)
     const [ texmonth, setTextMonth ] = useState([])
+    // console.log(menuNo==='Сведений о сегодняшнем меню нет')
 
     // console.log(menu)
 
@@ -97,6 +124,8 @@ function FoodMenuScreen({navigation, goBack}) {
           let parse_first = JSON.parse(info)
           let parse_second = JSON.parse(parse_first.response)
           let parse_third = parse_second.status
+
+        //   console.log(parse_third === 'Сведений о сегодняшнем меню нет')
             setMenu((JSON.stringify(parse_third)).split(';'))
             setMenuNo(parse_third)
             const month = moment().format('MM')
@@ -164,9 +193,9 @@ function FoodMenuScreen({navigation, goBack}) {
     
             foods.push(
                 <View style={{ flexDirection:'row', marginBottom: 20,}} key={Math.random()}>
-                    <FontAwesome name="circle" size={15} color="#D64D43" style={{marginTop:3}}/>
+                    <FontAwesome name="circle" size={15} color={isDarkMode === true ? '#C0D5EE' : '#D64D43'} style={{marginTop:3}}/>
                     <View style={{marginLeft: 5 }}>
-                        <Text style={{color:'black', fontSize: 16}} key={Math.random()}>{eat}</Text>
+                        <Text style={{color: theme.color, fontSize: 16}} key={Math.random()}>{eat}</Text>
                     </View>
                 </View> 
             )
@@ -175,8 +204,22 @@ function FoodMenuScreen({navigation, goBack}) {
         const noneMenu = JSON.parse(menu)
         // console.log(noneMenu)
         foods.push(
-            <View style={{alignItems:'center', justifyContent: 'center', width: windowWidth-60, height: 50, backgroundColor:'#F5DBDA', borderRadius:15, marginTop: 30}} key={Math.random()}>
-            <Text style = {{fontSize: 15, textAlign:'center',color:"#D64D43", fontWeight:'bold' }}>{lang ==='kz' || lang ==='ch' ? i18n.t('foodwarning') : noneMenu} 😕</Text>
+            <View style={{alignItems:'center', justifyContent: 'center', marginTop: 20}} key={Math.random()}>
+
+
+<View style={{width:"auto", height:'auto', alignItems:'center', backgroundColor:'#FFE6D9', padding:15, borderRadius:50}}>
+<LottieView
+            source={require("../../../assets/animation/137365-food.json")}
+            autoPlay
+            loop={true}
+            speed={1.3}
+            style={{width:160, height:160}}
+          />
+
+          <View style={{width:windowWidth-120, marginTop:15}}>
+          <Text style = {{fontSize: 18, textAlign:'center',color:"#D64D43", fontWeight:'bold', lineHeight:27}}>{lang ==='kz' || lang ==='ch' ? i18n.t('foodwarning') : noneMenu}</Text>
+          </View>
+</View>
         </View>
         )
 
@@ -199,8 +242,8 @@ function FoodMenuScreen({navigation, goBack}) {
 
     if(isLoading) {
         return(
-            <View style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
-                <WaveIndicator color="#D64D43"/>
+            <View style={{flex: 1, justifyContent:'center', alignItems: 'center',backgroundColor: isDarkMode === true ? "#191E2D" : 'white' }}>
+                <WaveIndicator color={theme.loading}/>
             </View>
         )
     }
@@ -209,14 +252,14 @@ function FoodMenuScreen({navigation, goBack}) {
 
     return (
         
-        <View style={{backgroundColor: '#D64D43'}}>
+        <View style={{backgroundColor: theme.menuBalance}}>
             <StatusBar style='light'/>
             {/* <Text style={styles.header}>Меню столовая</Text> */}
             <View style={{flexDirection:'row', width: windowWidth-60, alignItems:'center', marginTop:0, marginLeft: 30 }}>
                 {/* <BackButton goBack = {navigation.goBack} style={{color:'white'}}/> */}
              </View>
             <View style={{alignItems: 'center'}}>
-                <View style={styles.balance}>
+                <View style={[styles.balance, {backgroundColor: theme.menuBalance}]}>
                     <View style={{marginBottom: 10, flexDirection:'row'}} >
                         <FontAwesome5 name="money-check" size={18} color="white" />
                         <Text style={{fontSize: 18, marginLeft: 5, color: 'white', fontWeight:'semi-bold'}}>{i18n.t('foodbalance')}: <Text style={{fontWeight: 'bold', color: 'white'}}>{balance}</Text></Text>
@@ -228,8 +271,8 @@ function FoodMenuScreen({navigation, goBack}) {
                     </View>
                 </View>
 
-                <View style={styles.foodmenu}>
-                <Text style={{position:'absolute', top:21, fontSize:18, fontWeight:'medium'}}>{date}</Text>
+                <View style={[styles.foodmenu, {backgroundColor: isDarkMode === true ? '#1C3F5C': 'white'}]}>
+                <Text style={{position:'absolute', top:21, fontSize:18, fontWeight:'medium', color: theme.color}}>{date}</Text>
                 <View style={styles.foods}>
                    {/* { !shouldShow ? <View style={{alignItems:'center'}}><Text>{menuNo}</Text></View> : {foods}}  */}
                    {foods}
@@ -255,7 +298,6 @@ const styles = StyleSheet.create({
         top: 15,
         width: windowWidth - 40,
         // height: 150,
-        backgroundColor: '#D64D43',
         // flexDirection: 'row',
         padding: 15,
         // justifyContent: 'center',
@@ -266,7 +308,6 @@ const styles = StyleSheet.create({
     foodmenu: {
         width: '100%',
         height: windowHeight,
-        backgroundColor: 'white',
         top: 50,
         justifyContent: 'center',
         alignItems:'center',

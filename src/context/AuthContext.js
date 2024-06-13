@@ -23,6 +23,8 @@ export const AuthProvider = ({children}) => {
     const [userInfo, setUserInfo] = useState({});
     const [splashLoading, setSplashLoading] = useState(false)
     const [iin, setIin] = useState('')
+    const [userVerified, setUserVerified] = useState('')
+    const [foreignUser, setForeignUser] = useState('')
     const [status, setStatus] = useState({})
     const [restores, setRestores] = useState(null)
     const [restoresp, setRestoresp] = useState(null)
@@ -32,6 +34,13 @@ export const AuthProvider = ({children}) => {
     const [isApparat, setIsApparat] = useState({})
     const [historyStatus, setHistoryStatus] = useState('')
     let [openedLength, setOpenedLength] = useState('')
+    const [showBiometric, setShowBiometric] = useState(false)
+
+    // const [showBiometric, setShowBiometric] = useState(false)
+    const [type, setType] = useState('')
+    globalThis.showBiometric = showBiometric
+
+    AsyncStorage.setItem('showbiometricpage', JSON.stringify(showBiometric))
   
 
     // console.log(userInfo)
@@ -214,6 +223,7 @@ export const AuthProvider = ({children}) => {
             let parsed = JSON.parse(user_password)
             let newpassword = parsed.status
             setNewPasswords(newpassword)
+            // console.log(parsed)
             setIsLoading(false)  
         })
       
@@ -222,6 +232,37 @@ export const AuthProvider = ({children}) => {
             setIsLoading(false)
         }) 
     }
+
+    const changePhone = (newparoliin, newtel) => {
+        setIsLoading(true)
+        const data = qs.stringify({
+          'newparoliin': newparoliin,
+          'newtel': newtel
+        });
+        const config = {
+          method: 'post',
+          url: 'http://95.57.218.120/?index',
+          headers: { 
+            'Authorization': 'Basic OTgwNjI0MzUxNDc2OjIyMjI=', 
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          data : data
+        };
+        axios(config)
+        .then(async function(response){
+            let user_password = response.data.replace(/<[^>]*>/g, '').replace(/-->/g, '')
+            let parsed = JSON.parse(user_password)
+            let newpassword = parsed.status
+            console.log(parsed)
+            setIsLoading(false)
+        })
+      
+        .catch(function(error){
+            console.log(error)
+            setIsLoading(false)
+        }) 
+    }
+
 
 
     useEffect(()=>{
@@ -246,7 +287,6 @@ export const AuthProvider = ({children}) => {
 
     
     const login = async(finduseriin, finduserp) => {
-       
         setIsLoading(true)
         const data = qs.stringify({
             'finduseriin': finduseriin,
@@ -269,13 +309,13 @@ export const AuthProvider = ({children}) => {
             let apparat = parsed_user.apparat
             let stolovaya = parsed_user.stolovaya
             let sotrpm = parsed_user.sotrpm
-            // console.log(parsed_user)
             setIin(iin)
             setIsApparat(apparat)
             AsyncStorage.setItem('userApparat', apparat)
             AsyncStorage.setItem('userStolovaya', stolovaya)
             AsyncStorage.setItem('userSotrpm', sotrpm)
             setStatus(status)
+
 
             if (status === "IIN not found"){
                 Alert.alert(i18n.t('erIinAlert'))
@@ -300,11 +340,28 @@ export const AuthProvider = ({children}) => {
             }
             if (response && response.data && iin !== null ) {
                 await AsyncStorage.setItem('useriin', iin)
-                globalThis.iinuser1 = iin
                 await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo))
+                globalThis.iinuser1 = iin
             }
-            
-        
+
+            if(parsed_user.isforeign === '1' || parsed_user.verified === false){
+                setIsLoading(true)
+                setShowBiometric(false)
+                setIsLoading(false)
+            }else{
+                setIsLoading(true)
+                setShowBiometric(true)
+                setIsLoading(false)
+            }
+
+            if(parsed_user.iin === "111111111111"){
+                setIsLoading(true)
+                setShowBiometric(false)
+                setIsLoading(false)
+            }
+            setForeignUser(parsed_user.isforeign)
+            setUserVerified(parsed_user.verified)
+
             setIsLoading(false)
         })
         .catch(function(error){
@@ -313,9 +370,8 @@ export const AuthProvider = ({children}) => {
         })  
     }
 
-    // console.log(userInfo.status)
 
-    // console.log(userInfo)
+    
 
     const logout = () =>{
         setIsLoading(true)
@@ -361,6 +417,8 @@ export const AuthProvider = ({children}) => {
         value={{
             userInfo,
             iin,
+            userVerified,
+            foreignUser,
             isLoading,
             splashLoading,
             setModalVisible,
@@ -375,12 +433,16 @@ export const AuthProvider = ({children}) => {
             logoutRes,
             newPassword,
             newPasswords,
+            changePhone,
             restoreIin,
             mod,
             isApparat,
             openedLength,
             setOpenedLength,
-            historyOpened
+            historyOpened,
+            setShowBiometric,
+            showBiometric,
+            type, setType
         }}>
             {children}
         </AuthContext.Provider>

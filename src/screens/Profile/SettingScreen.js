@@ -9,10 +9,15 @@ import { MaterialIcons, Entypo, MaterialCommunityIcons, Ionicons } from '@expo/v
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 
+import LottieView from "lottie-react-native"
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+// import VerifyForPassword from './VerifyForPassword';
+// import MainVerified from './VerifiedForPhone';
 const now = new Date()
+
 // console.log(now)
 
 const windowWidth = Dimensions.get('window').width;
@@ -34,7 +39,6 @@ async function registerForPushNotificationsAsync() {
   
         const schedulingOptions = {
           content: {
-            sound: require('../../../assets/click-124467.wav'),
             title: 'AMG-Life',
             body: 'Доступна новая версия приложения. Попробуйте прямо сейчас',
           },
@@ -69,7 +73,7 @@ async function registerForPushNotificationsAsync() {
 
 function SettingsScreen({navigation}) {
 
-    let [locale, setLocale] = useState('');
+  let [locale, setLocale] = useState('');
   let [lang, setLang] = useState('')
 
   i18n.fallbacks = true
@@ -103,22 +107,31 @@ function SettingsScreen({navigation}) {
     const {logout, iin, restore} = useContext(AuthContext)
 
     const [modalVisible, setModalVisible] = useState(false);
+    
+    
 
     return(
         <View style={{...styles.container, opacity: modalVisible ? 0.3 : 1, alignItems:'center'}}>
             <StatusBar style='dark'/>
             <SafeAreaView>
             <View style={{marginTop: 20, alignItems:'center', borderWidth: 1, width:windowWidth-40, borderRadius:15, borderColor:'#E4E4E4'}}>
+
+
+  
             <View style={{width: windowWidth - 30, marginBottom: 2}}>
                 <List.Item
                     title = {i18n.t('changeParol')}
                     titleStyle={{color:'#4D4D4D'}}
-                    onPress = {() => {navigation.navigate('ChangePassword')}}
+                    onPress = {() => {navigation.navigate('VerifiedForPhone') }}
                     // right = {() => <MaterialIcons name="arrow-forward-ios" size={18} color="#4D4D4D" />}
                     left = {() => <MaterialCommunityIcons name="form-textbox-password" style={{marginLeft:20, marginRight:-5}} size={20} color="#4D4D4D" />}
                     rippleColor='transparent'
                 />
             </View>
+            {/* <View>
+              <VerifyForPassword check={type}/>
+            </View> */}
+          
 
 
 
@@ -159,13 +172,14 @@ function SettingsScreen({navigation}) {
                 <List.Item
                     title = {i18n.t('changePhone')}
                     titleStyle={{color:'#4D4D4D'}}
-                    onPress = {() => {navigation.navigate('ChangePhone')}}
+                    onPress = {() => {navigation.navigate('VerifiedForPhone')}}
                     // right = {() => <MaterialIcons name="arrow-forward-ios" size={18} color="#4D4D4D" />}
                     left = {() => <MaterialIcons name="phone-iphone" style={{marginLeft:20, marginRight:-5}} size={20} color="#4D4D4D" />}
                     rippleColor='transparent'
                 />
             </View>
   </View>
+
 
 
 {/* <TouchableOpacity   onPress = {() => {navigation.navigate('ChangeLang')}}><Text>eeeeeeeeeeeeeeeeeeeeee</Text></TouchableOpacity> */}
@@ -182,6 +196,7 @@ function SettingsScreen({navigation}) {
                 />
             </View>
   </View>
+
 
             
 

@@ -4,12 +4,11 @@ import { Provider } from 'react-native-paper'
 import { theme } from './src/cores/theme'
 import { AuthContext, AuthProvider } from './src/context/AuthContext'
 import Navigation from './src/components/Navigation'
-import './src/languages/i18n'
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 
 import NetInfo from '@react-native-community/netinfo'
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
 export default function App({navigation}) {
   const [notification, setNotification] = useState(false);
@@ -88,21 +87,7 @@ export default function App({navigation}) {
 
   useEffect(()=>{
     checkInternetConnection()
-
   },[])
-
-
-
-
-  
-  // if(isLoading) {
-  //   return(
-  //       <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor:'white'}}>
-  //           <WaveIndicator color="#D64D43"/>
-  //       </View>
-  //   )
-  // }
-
 
   return (
     <AuthProvider>

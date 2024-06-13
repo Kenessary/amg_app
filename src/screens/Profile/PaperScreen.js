@@ -1,21 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { View, SafeAreaView, Text, TouchableOpacity, StyleSheet, LogBox, Dimensions, useWindowDimensions, Image, FlatList,  VirtualizedList } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, SafeAreaView, Text, TouchableOpacity, StyleSheet, LogBox, Dimensions, useWindowDimensions, Image, FlatList,  VirtualizedList, ActivityIndicator } from 'react-native';
 // import { View, Text } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import BackButton from '../../components/BackButton';
 import Button from '../../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { WaveIndicator } from 'react-native-indicators';
+import { UIActivityIndicator, WaveIndicator } from 'react-native-indicators';
 import { Table, TableWrapper, Row, Rows, Col } from 'react-native-table-component';
 import qs from "qs"
 import axios from "axios";
 import { ScrollView } from 'react-native-virtualized-view';
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
+import themeContext from '../../cores/themeContext'
+import { FontAwesome5 } from '@expo/vector-icons';
+
 
 
 const windowWidth = Dimensions.get('window').width;
 export default function PaperScreen({navigation}) {
+
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  globalThis.dm = isDarkMode
+
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+  
+
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+
+
+  if(isDarkMode === true){
+    DropDownPicker.setTheme("DARK")
+  }else{
+    DropDownPicker.setTheme('LIGHT')
+  }
 
   let [locale, setLocale] = useState('');
   // let [isLoading, setIsLoading] = useState('')
@@ -215,38 +246,38 @@ const leftRepElem = Array(list.levcount).fill(28)
 const rightRepElem = Array(list.pravcount).fill(28)
 
 
-  if(isLoading) {
-    return(
-        <View  style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
-            <WaveIndicator color="#D64D43"/>
-        </View>
-    )
-  }
+  // if(isLoading) {
+  //   return(
+  //     <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+  //     <WaveIndicator color={theme.loading}/>
+  //   </View>
+  //   )
+  // }
 
   const tableHeader = (a) => (
     <View>
       <View>
       </View>
     
-    <View style={styles.tableHeader}>
-        <TouchableOpacity 
+      <View style={[styles.tableHeader, {backgroundColor: isDarkMode === true ? "#1C3F5C" : "#EAE9E9"}]}>
+        <View 
             style={styles.columnHeader1} >
-            <Text style={styles.columnHeaderTxt}>
+            <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                 {i18n.t('nasch')}
             </Text>   
-        </TouchableOpacity>
-        <TouchableOpacity 
+        </View>
+        <View
             style={styles.columnHeader2} >
-            <Text style={styles.columnHeaderTxt}>
+            <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                 {i18n.t('dni')}
             </Text> 
-        </TouchableOpacity>
-        <TouchableOpacity 
+        </View>
+        <View
             style={styles.columnHeader3} >
-            <Text style={styles.columnHeaderTxt}>
+            <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                 {i18n.t('summa')}
             </Text>
-        </TouchableOpacity>
+        </View>
     </View>
     </View>
     )
@@ -256,19 +287,19 @@ const rightRepElem = Array(list.pravcount).fill(28)
         <View>
         </View>
       
-      <View style={styles.tableHeader}>
-          <TouchableOpacity 
+      <View style={[styles.tableHeader, {backgroundColor: isDarkMode === true ? "#1C3F5C" : "#EAE9E9"}]}>
+          <View 
               style={styles.columnHeader4} >
-              <Text style={styles.columnHeaderTxt}>
+              <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                   {i18n.t('uder')}
               </Text>   
-          </TouchableOpacity>
-          <TouchableOpacity 
+          </View>
+          <View 
               style={styles.columnHeader5} >
-              <Text style={styles.columnHeaderTxt}>
+              <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                   {i18n.t('summa')}
               </Text> 
-          </TouchableOpacity>
+          </View>
       </View>
       </View>
       )
@@ -278,44 +309,44 @@ const rightRepElem = Array(list.pravcount).fill(28)
           <View>
           </View>
         
-        <View style={styles.tableHeader}>
-            <TouchableOpacity 
+        <View style={[styles.tableHeader,{ backgroundColor: isDarkMode === true ? "#1C3F5C" : "#EAE9E9"}]}>
+            <View 
                 style={styles.columnHeader6} >
-                <Text style={styles.columnHeaderTxt}>
+                <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                     {itog[0]}
                 </Text>   
-            </TouchableOpacity>
-            <TouchableOpacity 
+            </View>
+            <View 
                 style={styles.columnHeader7} >
-                <Text style={styles.columnHeaderTxt}>
+                <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                     {itog[1]}
                 </Text> 
-            </TouchableOpacity>
-            <TouchableOpacity 
+            </View>
+            <View 
                 style={styles.columnHeader8} >
-                <Text style={styles.columnHeaderTxt}>
+                <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                     {itog[2]}
                 </Text> 
-            </TouchableOpacity>
-            <TouchableOpacity 
+            </View>
+            <View 
                 style={styles.columnHeader9} >
-                <Text style={styles.columnHeaderTxt}>
+                <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                     {itog[3]}
                 </Text> 
-            </TouchableOpacity>
-            <TouchableOpacity 
+            </View>
+            <View 
                 style={styles.columnHeader10} >
-                <Text style={styles.columnHeaderTxt}>
+                <Text style={[styles.columnHeaderTxt,{color:theme.color}]}>
                     {itog[4]}
                 </Text> 
-            </TouchableOpacity>
+            </View>
         </View>
         </View>
         )
-        
+     
 
   return (
-    <View>
+    <View style={{backgroundColor: theme.background}}>
       <ScrollView  style={{height:'100%', marginBottom:100}} showsVerticalScrollIndicator={false}>
       {/* <View style={{flexDirection:'row',  marginTop:40, width: windowWidth-30, alignItems:'center', marginLeft: 15}}>
         <BackButton goBack = {navigation.goBack}/>
@@ -328,7 +359,7 @@ const rightRepElem = Array(list.pravcount).fill(28)
       {/* <ScrollView> */}
 
       <View style= {styles.page}>
-        <View style={styles.pickerContainer}>
+        <View style={[styles.pickerContainer, {backgroundColor: isDarkMode === true ? "#191E2D" : "white"}]}>
           <View style={styles.datePickers}>
             <View style={styles.yearPicker}>
               <DropDownPicker
@@ -338,25 +369,24 @@ const rightRepElem = Array(list.pravcount).fill(28)
                 setOpen={setOpenMonth}
                 setValue={setValueMonth}
                 setItems={setItemsMonth}
-                style={{width: 120, borderWidth:1,borderColor:'#4d4d4d' }}
+                labelStyle={{color:theme.color}}
+                style={{width: 120, borderWidth:0.5,borderColor:'#4d4d4d', backgroundColor: theme.background}}
                 containerStyle={{width: 120, borderRadius: 0}}
-                dropDownContainerStyle={{width: 120, borderWidth:0,}}
                 badgeSeparatorStyle = {{borderWidth:2}}
                 itemSeparator={true}
                 itemSeparatorStyle={{width: windowWidth, marginLeft: 5, opacity: 0.1}}
-                // itemProps={{style:{width: windowWidth}}}
                 placeholder="Месяц"
                 searchable={false}
                 modalTitle={i18n.t('chooseMonth')}
                 modalAnimationType="slide"
                 listMode="MODAL"
                 modalContentContainerStyle={{
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.background,
                 }}
                 modalTitleStyle={
                   {
                     fontWeight:'bold',
-                    color:'#4D4D4D'
+                    color: theme.color
                   }
                 }
               />
@@ -369,7 +399,8 @@ const rightRepElem = Array(list.pravcount).fill(28)
                 setOpen={setOpenYear}
                 setValue={setValueYear}
                 setItems={setItemsYear}
-                style={{width: 120, borderWidth:1,borderColor:'#4d4d4d'}}
+                labelStyle={{color:theme.color}}
+                style={{width: 120, borderWidth:0.5,borderColor:'#4d4d4d', backgroundColor: theme.background}}
                 containerStyle={{width: 120, borderRadius: 0}}
                 dropDownContainerStyle={{width: 120, borderWidth:0,}}
                 badgeSeparatorStyle = {{borderWidth:2}}
@@ -381,121 +412,145 @@ const rightRepElem = Array(list.pravcount).fill(28)
                 modalAnimationType="slide"
                 listMode="MODAL"
                 modalContentContainerStyle={{
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.background,
                 }}
                 modalTitleStyle={
                   {
                     fontWeight:'bold',
-                    color:'#4D4D4D'
+                    color:theme.color
                   }
                 }
               />
 
             </View>
           </View> 
-          <Button mode="contained" 
-              onPress = {()=> {getPaper(userIin, valueYear, valueMonth); setShouldShow()}}
-              style={styles.submitBtn}
-          >{i18n.t('loadPaper')}
-          </Button> 
+
+
+            
+{ isLoading === true 
+  ?  <Text style={{fontSize: 16, color:theme.color, fontWeight:'700', marginRight:10, textAlign:'center', paddingBottom:25, paddingTop:25, paddingLeft:10, paddingRight:10}}>Подождите, расчетный лист формируется</Text> 
+  : 
+  <TouchableOpacity
+  disabled={isLoading === false ? false : true}
+    style={{width: windowWidth-100, height:50, backgroundColor: isLoading === false ? theme.loading : '#B8B8B8', borderRadius:15, alignItems:'center', justifyContent:'center', marginTop:20, marginBottom:20}}
+    onPress = {()=> {getPaper(userIin, valueYear, valueMonth); setShouldShow()}}
+  >
+  
+  <Text style={{fontSize: 16, color:theme.background, fontWeight:'700'}}>{i18n.t('loadPaper')}</Text>
+  </TouchableOpacity>
+}
+            
+          
         </View>
         
 
       {!shouldShow ? (
         
-        
-<View style={styles.paper}>
+        <View>
+
+          {isLoading === true 
+          ? <View style={{alignItems:'center', justifyContent:'center', marginTop:30}}>
+            <ActivityIndicator color={theme.loading} size={'large'}/>
+          </View>
+          :  <View style={[styles.paper, {backgroundColor: isDarkMode === true ? "#191E2D" : "white"}]}>
   
-<View style={styles.container}>
-      <Text style={styles.paperHeader}>{i18n.t('paperTitle')} {textMonth} {valueYear} {i18n.t('paperYear')}</Text>
-      <View style={styles.divider}></View>
-      {/* <ScrollView  style={{height:'100%'}} showsVerticalScrollIndicator={false}> */}
-      <Text style={{textAlign: 'left', fontSize: 12, width: windowWidth-20, marginBottom: 5, marginLeft: 10}}>{i18n.t('saldoBas')} {list.saldo_nach}</Text>
- 
+          <View style={styles.container}>
+                <Text style={[styles.paperHeader, {color: isDarkMode === true ? 'white' : "green"}]}>{i18n.t('paperTitle')} {textMonth} {valueYear} {i18n.t('paperYear')}</Text>
+                <View style={[styles.divider, {backgroundColor: isDarkMode === true ? "white" : "green" }]}></View>
+                {/* <ScrollView  style={{height:'100%'}} showsVerticalScrollIndicator={false}> */}
+                <Text style={{textAlign: 'left', fontSize: 12, width: windowWidth-20, marginBottom: 5, marginLeft: 10, color:theme.color}}>{i18n.t('saldoBas')} {list.saldo_nach}</Text>
+           
+          
+          
+                  <View style={{flexDirection: 'row', width: "100%"}}>
+                          <FlatList 
+                            data={nas}
+                            listKey={1}
+                            style={{width:"60%"}}
+                            keyExtractor={(item, index) => index+""}
+                            ListHeaderComponent={tableHeader}
+                            // showsVerticalScrollIndicator={false}
+                            stickyHeaderIndices={[0]}
+                            // nestedScrollEnabled={false}
+                            horizontal={false}
+                            scrollEnabled={false}
+                            renderItem={({item, index})=> {
+                              // console.log(item.timein)
+                              return (
+                                <View style={{...styles.tableRow, backgroundColor: isDarkMode === true ? "#191E2D" : "white"}}>
+                                  <Text style={{...styles.columnRowTxt1, color: theme.color}}>{item.rasch}</Text>
+                                  <Text style={{...styles.columnRowTxt2,color: theme.color}}>{item.otrabotano}</Text>
+                                  <Text style={{...styles.columnRowTxt3,color: theme.color}}>{item.summa}</Text>
+                                </View>
+                              )}}
+                          />
+          
+          <FlatList 
+                            data={uder}
+                            style={{width:"40%"}}
+                            listKey={2}
+                            keyExtractor={(item, index) => index+""}
+                            ListHeaderComponent={tableHeaderUder}
+                            // showsVerticalScrollIndicator={false}
+                            stickyHeaderIndices={[0]}
+                            // nestedScrollEnabled={false}
+                            horizontal={false}
+                            scrollEnabled={false}
+                            renderItem={({item, index})=> {
+                              // console.log(item.timein)
+                              return (
+                                <View style={{...styles.tableRow, backgroundColor: isDarkMode === true ? "#191E2D" : "white"}}>
+                                  <Text style={{...styles.columnRowTxt4, color: theme.color}}>{item.rasch}</Text>
+                                  <Text style={{...styles.columnRowTxt5, color: theme.color}}>{item.summa}</Text>
+                                </View>
+                              )}}
+                          />
+                  </View>
+          
+                  <FlatList 
+                            // data={{}}
+                            style={{width:"100%"}}
+                            keyExtractor={(item, index) => index+""}
+                            ListHeaderComponent={tableHeaderItog}
+                            // showsVerticalScrollIndicator={false}
+                            stickyHeaderIndices={[0]}
+                            // nestedScrollEnabled={false}
+                            horizontal={false}
+                            scrollEnabled={false}
+                          />
+          
+                  <Text style={{textAlign: 'left', fontSize: 12,width: windowWidth-20, marginBottom: 2, marginTop: 5, marginLeft: 10, color:theme.color}}>
+                  {i18n.t('saldoAiak')} {list.saldo_kon}
+                  </Text>
+                  <Text style={{textAlign: 'left', fontSize: 12,width: windowWidth-20, marginBottom: 5, marginTop: 5, marginLeft: 10, color:theme.color}}>
+                  {i18n.t('chisla10')}
+                  </Text>
+                  <Text style={{textAlign: 'justify', fontSize: 12, color: isDarkMode === true ? "white" :'red', fontWeight: 'bold',width: windowWidth-20, marginBottom: 2, marginLeft: 10}}>
+                  {i18n.t('osms')}
+                  </Text>
+                  <Text style={{textAlign: 'justify', fontSize: 12, width: windowWidth-20, marginLeft: 10, color:theme.color}}>
+                  {i18n.t('footerText')}
+                  </Text>
+                  <View style={{marginBottom:30}}/>
+          
+                {/* </ScrollView> */}
+                {/* </ScrollView> */}
+                </View> 
+                </View>}
 
 
-        <View style={{flexDirection: 'row', width: "100%"}}>
-                <FlatList 
-                  data={nas}
-                  listKey={1}
-                  style={{width:"60%"}}
-                  keyExtractor={(item, index) => index+""}
-                  ListHeaderComponent={tableHeader}
-                  // showsVerticalScrollIndicator={false}
-                  stickyHeaderIndices={[0]}
-                  // nestedScrollEnabled={false}
-                  horizontal={false}
-                  scrollEnabled={false}
-                  renderItem={({item, index})=> {
-                    // console.log(item.timein)
-                    return (
-                      <View style={{...styles.tableRow, backgroundColor:"white"}}>
-                        <Text style={{...styles.columnRowTxt1}}>{item.rasch}</Text>
-                        <Text style={styles.columnRowTxt2}>{item.otrabotano}</Text>
-                        <Text style={styles.columnRowTxt3}>{item.summa}</Text>
-                      </View>
-                    )}}
-                />
 
-<FlatList 
-                  data={uder}
-                  style={{width:"40%"}}
-                  listKey={2}
-                  keyExtractor={(item, index) => index+""}
-                  ListHeaderComponent={tableHeaderUder}
-                  // showsVerticalScrollIndicator={false}
-                  stickyHeaderIndices={[0]}
-                  // nestedScrollEnabled={false}
-                  horizontal={false}
-                  scrollEnabled={false}
-                  renderItem={({item, index})=> {
-                    // console.log(item.timein)
-                    return (
-                      <View style={{...styles.tableRow, backgroundColor:"white"}}>
-                        <Text style={{...styles.columnRowTxt4}}>{item.rasch}</Text>
-                        <Text style={styles.columnRowTxt5}>{item.summa}</Text>
-                      </View>
-                    )}}
-                />
+
         </View>
+        
 
-        <FlatList 
-                  // data={{}}
-                  style={{width:"100%"}}
-                  keyExtractor={(item, index) => index+""}
-                  ListHeaderComponent={tableHeaderItog}
-                  // showsVerticalScrollIndicator={false}
-                  stickyHeaderIndices={[0]}
-                  // nestedScrollEnabled={false}
-                  horizontal={false}
-                  scrollEnabled={false}
-                />
-
-        <Text style={{textAlign: 'left', fontSize: 12,width: windowWidth-20, marginBottom: 2, marginTop: 5, marginLeft: 10}}>
-        {i18n.t('saldoAiak')} {list.saldo_kon}
-        </Text>
-        <Text style={{textAlign: 'left', fontSize: 12,width: windowWidth-20, marginBottom: 5, marginTop: 5, marginLeft: 10}}>
-        {i18n.t('chisla10')}
-        </Text>
-        <Text style={{textAlign: 'justify', fontSize: 12, color:'red', fontWeight: 'bold',width: windowWidth-20, marginBottom: 2, marginLeft: 10}}>
-        {i18n.t('osms')}
-        </Text>
-        <Text style={{textAlign: 'justify', fontSize: 12, width: windowWidth-20, marginLeft: 10,}}>
-        {i18n.t('footerText')}
-        </Text>
-        <View style={{marginBottom:30}}/>
-
-      {/* </ScrollView> */}
-      {/* </ScrollView> */}
-      </View> 
-      </View>
 
       
      
       
   ):
   <View style={{alignItems: 'center', marginTop: 10}}> 
-  <View style={{width: windowWidth-20, height: 100, backgroundColor: "white", justifyContent: 'center', borderRadius: 10}}>
+  <View style={{width: windowWidth-20, height: 100,backgroundColor: isDarkMode === true ? "#191E2D" : "white", justifyContent: 'center', borderRadius: 10}}>
     <Text style={{textAlign:'center', color: '#B3B3B3', fontSize: 16}}>{i18n.t('paperWarning')}</Text>
     </View>
     </View>}
@@ -522,8 +577,7 @@ const styles = StyleSheet.create({
   page: { alignItems:'center' },
   pickerContainer: {
     alignItems:'center', 
-    marginTop: 10, 
-    backgroundColor: 'white', 
+    marginTop: 10,
     width: windowWidth-20,
     // borderColor:'#E4E4E4',
     borderRadius:10
@@ -532,9 +586,9 @@ const styles = StyleSheet.create({
   yearPicker: { width: 120, marginRight: 30 },
   monthPicker: { width: 120 },
   submitBtn: { width: 270, marginBottom: 15, borderRadius: 15 },
-  paper : { width: windowWidth-10, backgroundColor:'white', paddingBottom: 20, borderRadius: 15, marginTop:10 },
-  paperHeader: {width: windowWidth-10, textAlign: 'center', fontSize: 15, fontWeight:'bold', color:'green' },
-  divider: {height: 1, width: windowWidth-30, backgroundColor: 'green', marginBottom: 10, marginTop: 5},
+  paper : { width: windowWidth-10, paddingBottom: 20, borderRadius: 15, marginTop:10 },
+  paperHeader: {width: windowWidth-10, textAlign: 'center', fontSize: 15, fontWeight:'bold'},
+  divider: {height: 1, width: windowWidth-30, marginBottom: 10, marginTop: 5},
   saldo_nach: {textAlign: 'left', fontSize: 12},
   saldo_n: {width: windowWidth-20, marginBottom: 5, marginLeft: 10},
   header:{
@@ -562,7 +616,6 @@ title:{
 
 tableHeader: {
   flexDirection: "row",
-  backgroundColor: "#EAE9E9",
   height: 35,
   // borderWidth:1,
 },
@@ -632,7 +685,6 @@ columnHeader10: {
   alignItems:"center"
 },
 columnHeaderTxt: {
-  color: "black",
   fontWeight:'bold',
   fontSize: 11,
 },

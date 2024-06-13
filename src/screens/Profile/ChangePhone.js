@@ -4,16 +4,40 @@ import Input from '../../components/Input'
 import { WaveIndicator } from 'react-native-indicators';
 import axios from "axios";
 import qs from "qs"
-import { Ionicons, FontAwesome } from '@expo/vector-icons'
+import { Ionicons, FontAwesome, AntDesign } from '@expo/vector-icons'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from 'i18n-js'
 import { kz, ru, ch } from '../../languages/localizations';
 import { AuthContext } from '../../context/AuthContext';
+import themeContext from '../../cores/themeContext';
+
+
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function ChangePhone({navigation}) {
+
+  const theme = useContext(themeContext)
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  globalThis.dm = isDarkMode
+  
+  useEffect(() => {
+    // Load the user's preference from AsyncStorage
+    loadDarkModePreference();
+  }, []);
+  
+  const loadDarkModePreference = async () => {
+    try {
+      const preference = await AsyncStorage.getItem('darkMode');
+      if (preference !== null) {
+        setIsDarkMode(JSON.parse(preference));
+      }
+    } catch (error) {
+      console.log('Error loading dark mode preference:', error);
+    }
+  };
+  
     const {iin} = useContext(AuthContext)
     const [disabled, setDisabled] = useState(true);
     const [inputs, setInputs] = useState({ phonetext: '' })
@@ -127,16 +151,20 @@ export default function ChangePhone({navigation}) {
 
       if(isLoading) {
         return(
-            <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor:'white', height:'100%'}}>
-                <WaveIndicator color="#D64D43"/>
-            </View>
+          <View style={{flex: 1, justifyContent:'center', alignItems: 'center', backgroundColor: isDarkMode === true ? '#262C38':''}}>
+          <WaveIndicator color={theme.loading}/>
+        </View>
         )
     }
 
 
     return (
-        <View style={{backgroundColor:"white", height:'100%'}}>
-        <View style={{alignItems:'center'}}>
+        <View style={{backgroundColor: theme.background, height:'100%'}}>
+
+<TouchableOpacity activeOpacity={0.7} onPress={()=>(navigation.navigate('ProfileScreen'))} style={{marginLeft: 30, marginTop:40}}>
+            <AntDesign name="leftsquare" size={24} color={theme.color} style={{opacity: 0.5}} />            
+          </TouchableOpacity>
+        <View style={{alignItems:'center', marginTop:20}}>
           <View style={{width:windowWidth-30}}>
             <Input 
                 keyboardType="numeric" 
